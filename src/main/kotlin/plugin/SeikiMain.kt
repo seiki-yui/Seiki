@@ -1,8 +1,10 @@
 package org.seiki.plugin
 
+import com.google.gson.Gson
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import net.mamoe.mirai.console.command.Command
 import net.mamoe.mirai.console.command.CommandManager
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
@@ -10,9 +12,16 @@ import net.mamoe.mirai.contact.nameCardOrNick
 import net.mamoe.mirai.event.broadcast
 import net.mamoe.mirai.event.events.*
 import net.mamoe.mirai.event.globalEventChannel
+import net.mamoe.mirai.event.subscribeMessages
+import net.mamoe.mirai.message.data.LightApp
 import net.mamoe.mirai.utils.info
+import org.seiki.SweetBoy
+import org.seiki.SweetBoy.matchRegexOrFail
 import org.seiki.SweetBoy.transToTime
 import org.seiki.plugin.command.audio.Audio
+import org.seiki.plugin.command.card.BiliApp
+import org.seiki.plugin.command.card.BiliLight
+import org.seiki.plugin.command.card.bili
 import org.seiki.plugin.command.image.*
 import org.seiki.plugin.command.plain.*
 
@@ -29,17 +38,52 @@ object SeikiMain : KotlinPlugin(
     private lateinit var jobTimeTick: Job
     override fun onEnable() {
         logger.info { "Seiki Main loaded" }
-        val list = listOf(
+        val commandList: List<Command> = listOf(
             Ping, Gpbt, Form, Two, Dazs, Kfc, Diana, Yiyan, Nbnhhsh, Baike, Bottle, Fencing,
             Diu, Tian, Bishi, Pa, Zan, Love, Qian, Draw,
             Osu, PronHub, FiveK, BlackWhite, Zero,
             Setu, Cosplay,
             Audio
         )
-        list.forEach {
+        commandList.forEach {
             CommandManager.registerCommand(it)
         }
         val eventChannel = globalEventChannel()
+        eventChannel.subscribeAlways<MessageEvent> {
+            message.forEach {
+                if (it is LightApp) {
+                    val gson = Gson()
+                    runCatching {
+                        val json = gson.fromJson(it.content, BiliLight::class.java)
+                        if (json.meta.detail_1.appid == "1109937557") {
+                            val url = SweetBoy.get(
+                                json.meta.detail_1.qqdocurl.substringBefore('?')
+                            ).request.url.toString()
+                            val bv = url.matchRegexOrFail(biliUrlRegex)[1]
+                            subject.sendMessage(subject.bili(bv))
+                        }
+                    }.onFailure { logger.info { "不是B站小程序" } }
+                    kotlin.runCatching {
+                        val json = gson.fromJson(it.content, BiliApp::class.java)
+                        if (json.meta.news.appid == 1105517988) {
+                            val url = SweetBoy.get(json.meta.news.jumpUrl).request.url.toString()
+                            val bv = url.matchRegexOrFail(biliUrlRegex)[1]
+                            subject.sendMessage(subject.bili(bv))
+                        }
+                    }.onFailure { logger.info { "不是B站类XML的JSON卡片" } }
+                }
+            }
+        }
+        eventChannel.subscribeMessages {
+            biliUrlRegex findingReply {
+                val (id) = it.destructured
+                subject.bili(id)
+            }
+            bili23tvRegex findingReply {
+                val (url) = it.destructured
+                subject.bili(SweetBoy.get(url).request.url.toString().matchRegexOrFail(biliUrlRegex)[1])
+            }
+        }
         eventChannel.subscribeAlways<BotOnlineEvent> {
             jobTimeTick = launch {
                 while (true) {
@@ -125,6 +169,7 @@ object SeikiMain : KotlinPlugin(
             }
         }
     }
+
     override fun onDisable() {
         jobTimeTick.cancel()
         super.onDisable()

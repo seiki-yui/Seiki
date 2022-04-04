@@ -4,11 +4,8 @@ import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
-import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileOutputStream
-import java.net.HttpURLConnection
-import java.net.URL
 import java.text.SimpleDateFormat
 import java.util.concurrent.TimeUnit
 
@@ -121,7 +118,7 @@ object SweetBoy {
      * @param number 保留的小数位数
      * @return 哈哈
      */
-    fun Number.transToTimeString(number: Number): String = when (this) {
+    fun Number.transToNumString(number: Number): String = when (this) {
         in 0..10000 -> this.toString()
         in 10000..100000000 -> "${String.format("%.${number}f", (this.toLong() / 10000.0))}万"
         in 100000000..1000000000000 -> "${String.format("%.${number}f", (this.toLong() / 100000000.0))}亿"
@@ -165,14 +162,4 @@ object SweetBoy {
      */
     suspend fun <R> String.matchRegexRunOrFail(regex: Regex, action: suspend (List<String>) -> R): R? =
         action(this.matchRegexOrFail(regex))
-
-    /**
-     * 由URL猜测文件的类型
-     * @return ContentType,示例"image/jpeg"
-     */
-    fun String.guessContentType() = HttpURLConnection.guessContentTypeFromStream(
-        BufferedInputStream(
-            URL(this).openConnection().apply { connect() }.inputStream
-        )
-    )
 }

@@ -15,6 +15,9 @@ class TimeTickEvent(
 
 val ownerList = arrayListOf(2630557998L, 1812691029L)
 
+val biliUrlRegex = """(?:https?://)?(?:www\.)?bilibili\.com/video/([aA][vV]\d+|[bB][vV][a-zA-Z0-9]+).*""".toRegex()
+val bili23tvRegex = """.*((?:https?://)?(?:www\.)?b23\.tv/[a-zA-Z0-9]+).*""".toRegex()
+
 fun MemberPermission.getName(): String = when (this) {
     MemberPermission.MEMBER -> "群员"
     MemberPermission.ADMINISTRATOR -> "管理员"
@@ -25,6 +28,6 @@ fun downloadImage(url: String) = SweetBoy.get(url).body!!.byteStream()
 
 suspend fun downloadAsImage(url: String, subject: Contact) = downloadImage(url).uploadAsImage(subject)
 
-suspend fun Contact.uploadImageFormUrl(url: String) = downloadAsImage(url,this)
+suspend fun Contact.uploadImageFormUrl(url: String) = downloadAsImage(url, this)
 
 suspend fun Contact.sendImageFormUrl(url: String) = this.uploadImageFormUrl(url).sendTo(this)

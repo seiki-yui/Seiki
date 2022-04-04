@@ -1,0 +1,18 @@
+package org.seiki.plugin.command.image
+
+import net.mamoe.mirai.console.command.CommandSender
+import net.mamoe.mirai.console.command.SimpleCommand
+import net.mamoe.mirai.message.data.Image
+import net.mamoe.mirai.message.data.Image.Key.queryUrl
+import org.seiki.plugin.SeikiMain
+import org.seiki.plugin.sendImageFormUrl
+
+object Draw : SimpleCommand(
+    SeikiMain, "draw", "素描",
+    description = "素描"
+) {
+    @Handler
+    suspend fun CommandSender.handle(image: Image) {
+        subject!!.sendImageFormUrl("http://ovooa.com/API/xian/?url=${image.queryUrl()}")
+    }
+}

@@ -1,0 +1,16 @@
+package org.seiki.plugin.command.plain
+
+import net.mamoe.mirai.console.command.CommandSender
+import net.mamoe.mirai.console.command.SimpleCommand
+import org.seiki.SweetBoy
+import org.seiki.plugin.SeikiMain
+
+object Diana : SimpleCommand(
+    SeikiMain, "diana",
+    description = "发病"
+) {
+    @Handler
+    suspend fun CommandSender.handle(name: String = "然然") {
+        sendMessage(SweetBoy.get("http://139.224.249.110:8008/api/diana/?name=$name").body!!.string())
+    }
+}

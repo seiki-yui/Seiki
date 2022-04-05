@@ -9,7 +9,7 @@ import net.mamoe.mirai.message.data.messageChainOf
 import org.seiki.SweetBoy
 import org.seiki.SweetBoy.matchRegexOrFail
 import org.seiki.SweetBoy.transToNumString
-import org.seiki.plugin.uploadImageFormUrl
+import org.seiki.plugin.uploadAsImage
 
 suspend fun Contact.bili(id: String): MessageChain {
     val isBv = if ("""[bB][vV][a-zA-Z0-9]+""".toRegex().matches(id)) true
@@ -25,7 +25,7 @@ suspend fun Contact.bili(id: String): MessageChain {
     val result2 = json?.let { bili ->
         return@let if (bili.code == 0) {
             buildMessageChain {
-                +this@bili.uploadImageFormUrl(bili.data.pic)
+                +this@bili.uploadAsImage(bili.data.pic)
                 +PlainText(bili.data.title + "\n")
                 +PlainText("https://www.bilibili.com/video/${(if (isBv) "av${bili.data.aid}" else bili.data.bvid)}/\n")
                 +PlainText("观看:${bili.data.stat.view.transToNumString(1)} ")

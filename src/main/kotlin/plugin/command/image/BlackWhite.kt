@@ -2,8 +2,8 @@ package org.seiki.plugin.command.image
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import net.mamoe.mirai.console.command.CommandSender
 import net.mamoe.mirai.console.command.SimpleCommand
+import net.mamoe.mirai.console.command.UserCommandSender
 import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.Image.Key.queryUrl
 import net.mamoe.mirai.utils.ExternalResource.Companion.sendAsImageTo
@@ -18,7 +18,7 @@ object BlackWhite : SimpleCommand(
     description = "生成黑白图"
 ) {
     @Handler
-    suspend fun CommandSender.handle(content: String = "", image: Image) {
+    suspend fun UserCommandSender.handle(content: String = "", image: Image) {
         val skikoImage = withContext(Dispatchers.IO) {
             URL(image.queryUrl()).openStream().use { input ->
                 requireNotNull(input)
@@ -52,6 +52,6 @@ object BlackWhite : SimpleCommand(
                 h + ((foo + text.height) / 2),
                 paint.apply { color = Color.WHITE })
         }
-        surface.makeImageSnapshot().toExternalResource().sendAsImageTo(subject!!)
+        surface.makeImageSnapshot().toExternalResource().sendAsImageTo(subject)
     }
 }

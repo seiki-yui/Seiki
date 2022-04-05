@@ -1,5 +1,7 @@
 package org.seiki.plugin.command.image
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import net.mamoe.mirai.console.command.CommandSender
 import net.mamoe.mirai.console.command.SimpleCommand
 import net.mamoe.mirai.utils.ExternalResource.Companion.sendAsImageTo
@@ -185,6 +187,8 @@ object FiveK : SimpleCommand(
             })
 
         }
-        surface.makeImageSnapshot().toExternalResource().sendAsImageTo(subject!!)
+        withContext(Dispatchers.IO) {
+            surface.makeImageSnapshot().toExternalResource().sendAsImageTo(subject!!)
+        }
     }
 }

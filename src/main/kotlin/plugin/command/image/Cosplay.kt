@@ -7,10 +7,11 @@ import net.mamoe.mirai.message.data.PlainText
 import net.mamoe.mirai.message.data.buildForwardMessage
 import net.mamoe.mirai.message.data.sendTo
 import net.mamoe.mirai.utils.info
+import net.mamoe.mirai.utils.warning
 import org.seiki.SweetBoy
 import org.seiki.SweetBoy.transToNumString
 import org.seiki.plugin.SeikiMain
-import org.seiki.plugin.uploadImageFormUrl
+import org.seiki.plugin.uploadAsImage
 
 object Cosplay : SimpleCommand(
     SeikiMain, "cos",
@@ -20,28 +21,33 @@ object Cosplay : SimpleCommand(
     suspend fun UserCommandSender.handle() {
         val json =
             Gson().fromJson(SweetBoy.get("http://ovooa.com/API/cosplay/").body!!.string(), Cosplay::class.java)
-        if (json.code == "1") kotlin.runCatching {
+        if (json.code == "1") /*kotlin.runCatching*/ {
+            val start = System.currentTimeMillis()
             val data = json.data.data
-            sendMessage(if (data.size > 100) "oh shit 图片超过100张！" else "有${data.size}张图片待发送，请稍等……")
+            sendMessage(if (data.size >= 100) "oh shit 图片超过100张！" else "有${data.size}张图片待发送，请稍等……")
             buildForwardMessage(subject) {
                 add(bot, PlainText(json.data.Title))
                 var time = System.currentTimeMillis()
+                SeikiMain.logger.info { "Cosplay - 开始缓存..." }
                 data.forEachIndexed { index, s ->
-                    val image = subject.uploadImageFormUrl(s)
-                    add(bot, image)
-                    SeikiMain.logger.info {
-                        "${index + 1} / ${data.size} = ${
-                            ((index + 1) / data.size * 100.0).transToNumString(2)
-                        }% size = ${(image.size / 1024.0).transToNumString(2)}kb = ${
-                            (image.size / 1024.0 / 1024.0).transToNumString(2)
-                        }mb times = ${((System.currentTimeMillis() - time) / 1000.0).transToNumString(2)}s"
+                    kotlin.runCatching {
+                        val image = subject.uploadAsImage(s)
+                        add(bot, image)
+                        SeikiMain.logger.info {
+                            "${index + 1} / ${data.size} = ${(image.size / 1024.0).transToNumString(2)}kb : ${
+                                (time - System.currentTimeMillis() / 1000.0).transToNumString(2)
+                            }s SUCCESS -> $s"
+                        }
+                        time = System.currentTimeMillis()
+                    }.onFailure {
+                        SeikiMain.logger.warning { "Cosplay - ${index + 1} / ${data.size} FAILURE -> ${it.javaClass.name} : ${it.message}" }
                     }
-                    time = System.currentTimeMillis()
                 }
             }.sendTo(subject)
-        }.onFailure {
+            sendMessage("总用时: ${(start - System.currentTimeMillis() / 1000.0).transToNumString(2)}")
+        }/*.onFailure {
             sendMessage("Cosplay功能发生了一点点差错……\n${it.javaClass.name}")
-        }
+        }*/
     }
 
     data class Cosplay(

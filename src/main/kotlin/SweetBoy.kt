@@ -1,5 +1,7 @@
 package org.seiki
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -9,11 +11,12 @@ import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.concurrent.TimeUnit
 
+@Suppress("unused")
 object SweetBoy {
     private val okHttpClient: OkHttpClient = OkHttpClient.Builder()
-        .readTimeout(20, TimeUnit.SECONDS)
-        .writeTimeout(20, TimeUnit.SECONDS)
-        .connectTimeout(20, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .connectTimeout(30, TimeUnit.SECONDS)
         .build()
 
     /**
@@ -61,6 +64,8 @@ object SweetBoy {
             throw e
         }
     }
+
+    suspend fun downloadAsByteStream(url: String) = withContext(Dispatchers.IO) { get(url).body!!.byteStream() }
 
     /**
      * 根据文件夹路径与后缀名来检索

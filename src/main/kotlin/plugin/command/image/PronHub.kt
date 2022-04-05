@@ -13,7 +13,7 @@ object PronHub : SimpleCommand(
     description = "生成PronHub风格的图标"
 ) {
     @Handler
-    suspend fun CommandSender.handle(left: String, right: String) {
+    suspend fun CommandSender.handle(left: String = "Pron", right: String = "Hub") {
         val phHeight = 170
         val widthPlus = 12
         val leftText = TextLine.make(left, Fonts["MiSans-Bold.ttf"])

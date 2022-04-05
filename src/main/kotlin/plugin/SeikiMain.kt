@@ -19,6 +19,7 @@ import org.seiki.SweetBoy
 import org.seiki.SweetBoy.matchRegexOrFail
 import org.seiki.SweetBoy.transToTime
 import org.seiki.plugin.command.audio.Audio
+import org.seiki.plugin.command.audio.Say
 import org.seiki.plugin.command.card.BiliApp
 import org.seiki.plugin.command.card.BiliLight
 import org.seiki.plugin.command.card.bili
@@ -43,7 +44,7 @@ object SeikiMain : KotlinPlugin(
             Diu, Tian, Bishi, Pa, Zan, Love, Qian, Draw,
             Osu, PronHub, FiveK, BlackWhite, Zero,
             Setu, Cosplay,
-            Audio
+            Audio, Say
         )
         commandList.forEach {
             CommandManager.registerCommand(it)
@@ -83,6 +84,8 @@ object SeikiMain : KotlinPlugin(
                 val (url) = it.destructured
                 subject.bili(SweetBoy.get(url).request.url.toString().matchRegexOrFail(biliUrlRegex)[1])
             }
+
+            "error" reply { throw Exception("www") }
         }
         eventChannel.subscribeAlways<BotOnlineEvent> {
             jobTimeTick = launch {
@@ -162,7 +165,7 @@ object SeikiMain : KotlinPlugin(
             }
         } // 管理权限改变
         eventChannel.subscribeAlways<TimeTickEvent> {
-            if (this.timestamp.transToTime("HH:mm:ss") == "11:45:14") {
+            if (this.timestamp.transToTime("HH:mm:ss") == "11:45:13") {
                 bot.groups.forEach {
                     it.sendMessage("Seiki报时!\n现在是11:45:14")
                 }
@@ -174,4 +177,37 @@ object SeikiMain : KotlinPlugin(
         jobTimeTick.cancel()
         super.onDisable()
     }
+//    TODO("Logger覆写")
+//    override fun PluginComponentStorage.onLoad() {
+//        this.contributeBotConfigurationAlterer { botId, config ->
+//            config.apply {
+//                botLoggerSupplier = {
+//                    object : MiraiLogger by MiraiLogger.Factory.create(Bot::class) {
+//                        override fun error(message: String?, e: Throwable?) {
+//                            e?.printStackTrace()
+//                            Bot.findInstance(botId)?.let {
+//                                launch {
+//                                    it.getGroup(813089162L)?.sendMessage(message ?: "unknown")
+//                                }
+//                            }
+//                            error(message)
+//                        }
+//
+//                        override fun error(message: String?) {
+//                            Bot.findInstance(botId)?.let {
+//                                launch {
+//                                    it.getGroup(813089162L)?.sendMessage(message ?: "unknown")
+//                                }
+//                            }
+//                        }
+//
+//                        override val isVerboseEnabled: Boolean get() = true
+//                        override val isInfoEnabled: Boolean get() = true
+//                        override val isWarningEnabled: Boolean get() = true
+//                        override val isDebugEnabled: Boolean get() = true
+//                    }
+//                }
+//            }
+//        }
+//    }
 }

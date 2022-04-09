@@ -1,10 +1,11 @@
 package org.seiki.plugin.command.plain
 
 import com.google.gson.Gson
-import net.mamoe.mirai.console.command.CommandSender
 import net.mamoe.mirai.console.command.SimpleCommand
+import net.mamoe.mirai.console.command.UserCommandSender
 import net.mamoe.mirai.message.data.PlainText
 import net.mamoe.mirai.message.data.buildMessageChain
+import net.mamoe.mirai.message.data.sendTo
 import org.seiki.SweetBoy
 import org.seiki.plugin.SeikiMain
 
@@ -13,17 +14,13 @@ object Baike : SimpleCommand(
     description = "百度百科"
 ) {
     @Handler
-    suspend fun CommandSender.handle(msg: String) {
+    suspend fun UserCommandSender.handle(msg: String) {
         val rel = SweetBoy.get("http://ovooa.com/API/bdbk/?Msg=$msg").body!!.string()
         val json = Gson().fromJson(rel, Baike::class.java)
-        sendMessage(
-            if (json.code == 1) {
-                buildMessageChain {
-                    +PlainText(json.data.Msg + "\n")
-                    +PlainText(json.data.info + "\n")
-                }
-            } else PlainText(json.text)
-        )
+        (if (json.code == 1) buildMessageChain {
+            +PlainText(json.data.Msg + "\n")
+            +PlainText(json.data.info + "\n")
+        } else PlainText(json.text)).sendTo(subject)
     }
 
     data class Baike(

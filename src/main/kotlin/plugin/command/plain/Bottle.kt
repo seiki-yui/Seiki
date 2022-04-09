@@ -1,8 +1,8 @@
 package org.seiki.plugin.command.plain
 
 import com.google.gson.Gson
-import net.mamoe.mirai.console.command.CommandSender
 import net.mamoe.mirai.console.command.CompositeCommand
+import net.mamoe.mirai.console.command.UserCommandSender
 import org.seiki.SweetBoy
 import org.seiki.plugin.SeikiMain
 
@@ -12,16 +12,16 @@ object Bottle : CompositeCommand(
 ) {
     @SubCommand
     @Description("捡漂流瓶")
-    suspend fun CommandSender.get() {
+    suspend fun UserCommandSender.get() {
         val json = Gson().fromJson(SweetBoy.get("http://ovooa.com/API/Piao/").body!!.string(), Bottle::class.java)
         sendMessage("${json.data[0].title}\n${json.data[0].text}\n${json.data[0].time}")
     }
 
     @SubCommand
     @Description("扔漂流瓶")
-    suspend fun CommandSender.`throw`(title: String, text: String) {
+    suspend fun UserCommandSender.`throw`(title: String, text: String) {
         val json = Gson().fromJson(
-            SweetBoy.get("http://ovooa.com/API/Piao/?Select=1&title=${title}&msg=${text}&QQ=${subject!!.id}").body!!.string(),
+            SweetBoy.get("http://ovooa.com/API/Piao/?Select=1&title=${title}&msg=${text}&QQ=${subject.id}").body!!.string(),
             BottleThrow::class.java
         )
         sendMessage(json.text)

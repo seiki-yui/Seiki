@@ -18,7 +18,9 @@ object BlackWhite : SimpleCommand(
     description = "生成黑白图"
 ) {
     @Handler
-    suspend fun UserCommandSender.handle(content: String = "", image: Image) {
+    suspend fun UserCommandSender.handle(content: String = "", image: Image? = null) {
+        if (image == null) return
+
         val skikoImage = withContext(Dispatchers.IO) {
             URL(image.queryUrl()).openStream().use { input ->
                 requireNotNull(input)

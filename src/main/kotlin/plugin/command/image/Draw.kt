@@ -13,7 +13,8 @@ object Draw : SimpleCommand(
     description = "素描"
 ) {
     @Handler
-    suspend fun UserCommandSender.handle(image: Image) {
+    suspend fun UserCommandSender.handle(image: Image? = null) {
+        if (image == null) return
         subject.uploadAsImage("http://ovooa.com/API/xian/?url=${image.queryUrl()}").sendTo(subject)
     }
 }

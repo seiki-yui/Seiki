@@ -6,14 +6,18 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.mamoe.mirai.console.command.Command
 import net.mamoe.mirai.console.command.CommandManager
+import net.mamoe.mirai.console.command.CommandSender.Companion.asCommandSender
+import net.mamoe.mirai.console.command.descriptor.ExperimentalCommandDescriptors
+import net.mamoe.mirai.console.command.execute
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
+import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import net.mamoe.mirai.contact.nameCardOrNick
 import net.mamoe.mirai.event.broadcast
 import net.mamoe.mirai.event.events.*
 import net.mamoe.mirai.event.globalEventChannel
 import net.mamoe.mirai.event.subscribeMessages
-import net.mamoe.mirai.message.data.LightApp
+import net.mamoe.mirai.message.data.*
 import net.mamoe.mirai.utils.info
 import org.seiki.SweetBoy
 import org.seiki.SweetBoy.matchRegexOrFail
@@ -36,14 +40,18 @@ object SeikiMain : KotlinPlugin(
     val audioFolder = dataFolder.resolve("audio")
     val resFolder = dataFolder.resolve("res")
 
+    private const val botName = "\uD835\uDE82\uD835\uDE8E\uD835\uDE92\uD835\uDE94\uD835\uDE92 \uD835\uDE71\uD835\uDE98\uD835\uDE9D"
+
     private lateinit var jobTimeTick: Job
+
+    @OptIn(ExperimentalCommandDescriptors::class, ConsoleExperimentalApi::class)
     override fun onEnable() {
         logger.info { "Seiki Main loaded" }
         val commandList: List<Command> = listOf(
             Ping, Gpbt, Form, Two, Dazs, Kfc, Diana, Yiyan, Nbnhhsh, Baike, Bottle, Fencing,
             Diu, Tian, Bishi, Pa, Zan, Love, Qian, Draw,
             Osu, PronHub, FiveK, BlackWhite, Zero,
-            Setu, Cosplay,
+            Setu, Aotu, Cosplay,
             Audio, Say
         )
         commandList.forEach {
@@ -75,6 +83,13 @@ object SeikiMain : KotlinPlugin(
                 }
             }
         }
+        eventChannel.subscribeAlways<TimeTickEvent> {
+            if (this.timestamp.transToTime("HH:mm:ss") == "11:45:13") {
+                bot.groups.forEach {
+                    it.sendMessage("Seiki报时!\n现在是11:45:14")
+                }
+            }
+        }
         eventChannel.subscribeMessages {
             biliUrlRegex findingReply {
                 val (id) = it.destructured
@@ -84,7 +99,36 @@ object SeikiMain : KotlinPlugin(
                 val (url) = it.destructured
                 subject.bili(SweetBoy.get(url).request.url.toString().matchRegexOrFail(biliUrlRegex)[1])
             }
-
+            """#0%?""".toRegex() finding {
+                if (message.findIsInstance<Image>() == null) Zero.execute(
+                    sender.asCommandSender(isTemp = false),
+                    getOrWaitImage()!!
+                )
+            }
+            """#bw ([\s\S]+)""".toRegex() finding {
+                val (text) = it.destructured
+                if (message.findIsInstance<Image>() == null) BlackWhite.execute(
+                    sender.asCommandSender(isTemp = false),
+                    buildMessageChain {
+                        +PlainText(text)
+                        +getOrWaitImage()!!
+                    }
+                )
+            }
+            """#draw""".toRegex() finding {
+                if (message.findIsInstance<Image>() == null) Draw.execute(
+                    sender.asCommandSender(isTemp = false),
+                    getOrWaitImage()!!
+                )
+            }
+            """\s*击剑\s*""".toRegex() finding {
+                kotlin.runCatching {
+                    Fencing.execute(
+                        sender.asCommandSender(isTemp = false),
+                        messageChainOf(message.findIsInstance<At>()!!)
+                    )
+                }
+            }
             "error" reply { throw Exception("www") }
         }
         eventChannel.subscribeAlways<BotOnlineEvent> {
@@ -104,7 +148,7 @@ object SeikiMain : KotlinPlugin(
         eventChannel.subscribeAlways<BotJoinGroupEvent> {
             launch {
                 delay(100L)
-                group.sendMessage("这里是Seiki Bot.发送\"# help\"来康教程.")
+                group.sendMessage("这里是$botName.发送\"# help\"来康教程.")
             }
         } // bot进群
         eventChannel.subscribeAlways<NudgeEvent> {
@@ -164,20 +208,13 @@ object SeikiMain : KotlinPlugin(
                 group.sendMessage("${member.nameCardOrNick}(${member.id})从${origin.getName()}便乘了${new.getName()}")
             }
         } // 管理权限改变
-        eventChannel.subscribeAlways<TimeTickEvent> {
-            if (this.timestamp.transToTime("HH:mm:ss") == "11:45:13") {
-                bot.groups.forEach {
-                    it.sendMessage("Seiki报时!\n现在是11:45:14")
-                }
-            }
-        }
     }
 
     override fun onDisable() {
         jobTimeTick.cancel()
         super.onDisable()
     }
-//    TODO("Logger覆写")
+/*    TODO("Logger覆写")
 //    override fun PluginComponentStorage.onLoad() {
 //        this.contributeBotConfigurationAlterer { botId, config ->
 //            config.apply {
@@ -209,5 +246,5 @@ object SeikiMain : KotlinPlugin(
 //                }
 //            }
 //        }
-//    }
+//    } */
 }

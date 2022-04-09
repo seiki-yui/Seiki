@@ -1,7 +1,7 @@
 package org.seiki.plugin.command.image
 
-import net.mamoe.mirai.console.command.CommandSender
 import net.mamoe.mirai.console.command.SimpleCommand
+import net.mamoe.mirai.console.command.UserCommandSender
 import net.mamoe.mirai.utils.ExternalResource.Companion.sendAsImageTo
 import org.jetbrains.skia.*
 import org.laolittle.plugin.Fonts
@@ -13,7 +13,7 @@ object PronHub : SimpleCommand(
     description = "生成PronHub风格的图标"
 ) {
     @Handler
-    suspend fun CommandSender.handle(left: String = "Pron", right: String = "Hub") {
+    suspend fun UserCommandSender.handle(left: String = "Pron", right: String = "Hub") {
         val phHeight = 170
         val widthPlus = 12
         val leftText = TextLine.make(left, Fonts["MiSans-Bold.ttf"])
@@ -64,6 +64,6 @@ object PronHub : SimpleCommand(
                 )
             }
         }
-        surface.makeImageSnapshot().toExternalResource().sendAsImageTo(subject!!)
+        surface.makeImageSnapshot().toExternalResource().sendAsImageTo(subject)
     }
 }

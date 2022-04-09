@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package org.seiki
 
 import kotlinx.coroutines.Dispatchers
@@ -11,7 +13,6 @@ import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.concurrent.TimeUnit
 
-@Suppress("unused")
 object SweetBoy {
     private val okHttpClient: OkHttpClient = OkHttpClient.Builder()
         .readTimeout(30, TimeUnit.SECONDS)
@@ -24,7 +25,8 @@ object SweetBoy {
      * @param url URL链接
      * @return okhttp给我返回了什么我就返回什么捏😋
      */
-    fun get(url: String): Response = okHttpClient.newCall(Request.Builder().url(url).build()).execute()
+    suspend fun get(url: String): Response =
+        withContext(Dispatchers.IO) { okHttpClient.newCall(Request.Builder().url(url).build()).execute() }
 
     /**
      * okhttp POST请求
@@ -32,37 +34,33 @@ object SweetBoy {
      * @param hashMap POST的json的HashMap
      * @return okhttp给我返回了什么我就返回什么捏😋
      */
-    fun post(url: String, hashMap: HashMap<String, String> = HashMap()): Response {
-        val builder = FormBody.Builder()
-        for (key in hashMap.keys) {
-            builder.add(key, hashMap[key]!!)
+    suspend fun post(url: String, hashMap: HashMap<String, String> = HashMap()): Response =
+        withContext(Dispatchers.IO) {
+            val builder = FormBody.Builder()
+            for (key in hashMap.keys) {
+                builder.add(key, hashMap[key]!!)
+            }
+            val formBody = builder.build()
+            return@withContext okHttpClient.newCall(
+                Request.Builder()
+                    .method("POST", formBody)
+                    .url(url)
+                    .build()
+            ).execute()
         }
-        val formBody = builder.build()
-        return okHttpClient.newCall(
-            Request.Builder()
-                .method("POST", formBody)
-                .url(url)
-                .build()
-        ).execute()
-    }
 
     /**
      * okhttp 下载
      * @param url 文件URL
      * @param path 储存文件的位置
      */
-    fun downloadFile(url: String, path: String): File {
+    suspend fun downloadFile(url: String, path: String): File = withContext(Dispatchers.IO) {
         val inputStream = get(url).body!!.byteStream()
-        try {
-            FileOutputStream(File(path)).apply {
-                write(inputStream.readBytes())
-                flush()
-                close()
-            }
-            return File(path)
-        } catch (e: Exception) {
-            throw e
+        val file = File(path)
+        FileOutputStream(file).apply {
+            write(inputStream.readBytes());flush();close()
         }
+        return@withContext file
     }
 
     suspend fun downloadAsByteStream(url: String) = withContext(Dispatchers.IO) { get(url).body!!.byteStream() }
@@ -77,20 +75,9 @@ object SweetBoy {
     fun findFileByExt(path: String, ext: List<String>, whetherFolder: Boolean? = true): MutableList<String> {
         val fileNames: MutableList<String> = mutableListOf()
         val fileTree: FileTreeWalk = File(path).walk()
-        if (whetherFolder != null && whetherFolder) {
-            fileTree.maxDepth(1)
-                .filter { it.isFile }
-                .filter { it.extension in ext }
-                .forEach {
-                    fileNames.add(it.name)
-                }
-        } else {
-            fileTree.filter { it.extension in ext }
-                .forEach {
-                    fileNames.add(it.name)
-                }
-        }
-
+        if (whetherFolder != null && whetherFolder)
+            fileTree.maxDepth(1).filter { it.isFile }.filter { it.extension in ext }.forEach { fileNames.add(it.name) }
+        else fileTree.filter { it.extension in ext }.forEach { fileNames.add(it.name) }
         return fileNames
     }
 
@@ -115,7 +102,7 @@ object SweetBoy {
         in 0..10000 -> this.toString()
         in 10000..100000000 -> "${this.toLong() / 10000}万"
         in 100000000..1000000000000 -> "${this.toLong() / 100000000}亿"
-        else -> "null"
+        else -> this.toString()
     }
 
     /**
@@ -127,7 +114,7 @@ object SweetBoy {
         in 0..10000 -> this.toString()
         in 10000..100000000 -> "${String.format("%.${number}f", (this.toLong() / 10000.0))}万"
         in 100000000..1000000000000 -> "${String.format("%.${number}f", (this.toLong() / 100000000.0))}亿"
-        else -> "null"
+        else -> this.toString()
     }
 
     /**

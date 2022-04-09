@@ -1,7 +1,7 @@
 package org.seiki.plugin.command.image
 
-import net.mamoe.mirai.console.command.CommandSender
 import net.mamoe.mirai.console.command.SimpleCommand
+import net.mamoe.mirai.console.command.UserCommandSender
 import net.mamoe.mirai.utils.ExternalResource.Companion.sendAsImageTo
 import org.jetbrains.skia.Color
 import org.jetbrains.skia.Paint
@@ -17,8 +17,12 @@ object Osu : SimpleCommand(
     SeikiMain, "osu",
     description = "生成OSU风格的图标"
 ) {
+    /**
+     * @author xiao_zheng
+     * 自己写的 哼o(´^｀)o
+     */
     @Handler
-    suspend fun CommandSender.handle(text: String = "osu!") {
+    suspend fun UserCommandSender.handle(text: String = "osu!") {
         val paint = Paint().apply {
             isAntiAlias = true
             color = Color.WHITE
@@ -38,6 +42,6 @@ object Osu : SimpleCommand(
                 drawTextLine(osuText, 175F - osuText.width / 2, yPos, paint)
             }
         }
-        surface.makeImageSnapshot().toExternalResource().sendAsImageTo(subject!!)
+        surface.makeImageSnapshot().toExternalResource().sendAsImageTo(subject)
     }
 }

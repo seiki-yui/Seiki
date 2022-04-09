@@ -1,7 +1,7 @@
 package org.seiki.plugin.command.image
 
-import net.mamoe.mirai.console.command.CommandSender
 import net.mamoe.mirai.console.command.SimpleCommand
+import net.mamoe.mirai.console.command.UserCommandSender
 import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.Image.Key.queryUrl
 import net.mamoe.mirai.utils.ExternalResource.Companion.sendAsImageTo
@@ -17,8 +17,11 @@ object Zero : SimpleCommand(
     description = "生成0%加载图片"
 ) {
     @Handler
-    suspend fun CommandSender.handle(image: Image) {
-        val skikoImage = org.jetbrains.skia.Image.makeFromEncoded(SweetBoy.downloadAsByteStream(image.queryUrl()).readBytes())
+    suspend fun UserCommandSender.handle(image: Image? = null) {
+        if (image == null) return
+
+        val skikoImage =
+            org.jetbrains.skia.Image.makeFromEncoded(SweetBoy.downloadAsByteStream(image.queryUrl()).readBytes())
         val w21 = (skikoImage.width shr 1).toFloat()
         val h21 = (skikoImage.height shr 1).toFloat()
         val radius = min(w21, h21) * .24f
@@ -45,7 +48,7 @@ object Zero : SimpleCommand(
                 })
             }
 
-            makeImageSnapshot().toExternalResource().sendAsImageTo(subject!!)
+            makeImageSnapshot().toExternalResource().sendAsImageTo(subject)
         }
     }
 }

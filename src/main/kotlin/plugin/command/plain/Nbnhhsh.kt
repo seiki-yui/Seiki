@@ -1,8 +1,8 @@
 package org.seiki.plugin.command.plain
 
 import com.google.gson.Gson
-import net.mamoe.mirai.console.command.CommandSender
 import net.mamoe.mirai.console.command.SimpleCommand
+import net.mamoe.mirai.console.command.UserCommandSender
 import org.seiki.SweetBoy
 import org.seiki.plugin.SeikiMain
 
@@ -11,7 +11,7 @@ object Nbnhhsh : SimpleCommand(
     description = "能不能好好说话？"
 ) {
     @Handler
-    suspend fun CommandSender.handle(text: String) {
+    suspend fun UserCommandSender.handle(text: String) {
         runCatching {
             val hashMap = HashMap<String, String>()
             hashMap["text"] = text

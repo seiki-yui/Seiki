@@ -6,7 +6,7 @@ import net.mamoe.mirai.contact.Member
 import org.seiki.plugin.SeikiMain
 
 object Fencing : SimpleCommand(
-    SeikiMain, "fencing", "击剑",
+    SeikiMain, "fencing",
     description = "击剑 at一个人，随机禁言其中一个"
 ) {
     @Handler

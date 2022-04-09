@@ -2,8 +2,8 @@ package org.seiki.plugin.command.image
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import net.mamoe.mirai.console.command.CommandSender
 import net.mamoe.mirai.console.command.SimpleCommand
+import net.mamoe.mirai.console.command.UserCommandSender
 import net.mamoe.mirai.utils.ExternalResource.Companion.sendAsImageTo
 import org.jetbrains.skia.*
 import org.laolittle.plugin.Fonts
@@ -14,8 +14,11 @@ object FiveK : SimpleCommand(
     SeikiMain, "5k",
     description = "生成五千兆图片"
 ) {
+    /**
+     * @author Cssxsh
+     */
     @Handler
-    suspend fun CommandSender.handle(top: String? = "", bottom: String? = "") {
+    suspend fun UserCommandSender.handle(top: String? = "", bottom: String? = "") {
         val words = arrayOf(top, bottom)
         val topText = TextLine.make(words[0], Fonts["Noto-Sans-SC-Bold.ttf"])
         val bottomText = TextLine.make(words[1], Fonts["Noto-Serif-SC-Bold.otf"])
@@ -188,7 +191,7 @@ object FiveK : SimpleCommand(
 
         }
         withContext(Dispatchers.IO) {
-            surface.makeImageSnapshot().toExternalResource().sendAsImageTo(subject!!)
+            surface.makeImageSnapshot().toExternalResource().sendAsImageTo(subject)
         }
     }
 }

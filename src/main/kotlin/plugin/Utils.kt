@@ -9,10 +9,8 @@ import net.mamoe.mirai.contact.Contact
 import net.mamoe.mirai.contact.MemberPermission
 import net.mamoe.mirai.event.AbstractEvent
 import net.mamoe.mirai.event.events.MessageEvent
-import net.mamoe.mirai.message.data.Image
+import net.mamoe.mirai.message.data.*
 import net.mamoe.mirai.message.data.MessageSource.Key.quote
-import net.mamoe.mirai.message.data.PlainText
-import net.mamoe.mirai.message.data.firstIsInstanceOrNull
 import net.mamoe.mirai.message.nextMessage
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
 import net.mamoe.mirai.utils.ExternalResource.Companion.uploadAsImage
@@ -56,12 +54,12 @@ suspend fun Contact.uploadAsAudio(file: File) = withContext(Dispatchers.IO) {
  */
 internal suspend fun MessageEvent.getOrWaitImage(): Image? {
     return (message.takeIf { m -> m.contains(Image) } ?: runCatching {
-        subject.sendMessage("请在30s内发送图片")
+        subject.sendMessage("请在30秒内发送图片...")
         nextMessage(30_000) { event -> event.message.contains(Image) }
     }.getOrElse { e ->
         when (e) {
             is TimeoutCancellationException -> {
-                subject.sendMessage(PlainText("超时未发送").plus(message.quote()))
+                messageChainOf(PlainText("超时未发送!"),message.quote()).sendTo(subject)
                 return null
             }
             else -> throw e

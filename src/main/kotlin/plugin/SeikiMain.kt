@@ -28,6 +28,7 @@ import org.seiki.plugin.command.card.BiliApp
 import org.seiki.plugin.command.card.BiliLight
 import org.seiki.plugin.command.card.bili
 import org.seiki.plugin.command.image.*
+import org.seiki.plugin.command.image.Moyu.moyu
 import org.seiki.plugin.command.plain.*
 
 object SeikiMain : KotlinPlugin(
@@ -41,6 +42,7 @@ object SeikiMain : KotlinPlugin(
     val resFolder = dataFolder.resolve("res")
 
     private const val botName = "\uD835\uDE82\uD835\uDE8E\uD835\uDE92\uD835\uDE94\uD835\uDE92 \uD835\uDE71\uD835\uDE98\uD835\uDE9D"
+    private const val useTimeTickEvent = false
 
     private lateinit var jobTimeTick: Job
 
@@ -48,7 +50,7 @@ object SeikiMain : KotlinPlugin(
     override fun onEnable() {
         logger.info { "Seiki Main loaded" }
         val commandList: List<Command> = listOf(
-            Ping, Gpbt, Form, Two, Dazs, Kfc, Diana, Yiyan, Nbnhhsh, Baike, Bottle, Fencing,
+            Ping, Gpbt, Form, Two, Dazs, Kfc, Diana, Yiyan, Nbnhhsh, Baike, Bottle, Fencing, Moyu,
             Diu, Tian, Bishi, Pa, Zan, Love, Qian, Draw,
             Osu, PronHub, FiveK, BlackWhite, Zero,
             Setu, Aotu, Cosplay,
@@ -86,7 +88,10 @@ object SeikiMain : KotlinPlugin(
         eventChannel.subscribeAlways<TimeTickEvent> {
             if (this.timestamp.transToTime("HH:mm:ss") == "11:45:13") {
                 bot.groups.forEach {
-                    it.sendMessage("Seiki报时!\n现在是11:45:14")
+                    it.sendMessage(buildMessageChain {
+                        +PlainText("Seiki报时!\n现在是11:45:14")
+                        +it.moyu()
+                    })
                 }
             }
         }
@@ -121,6 +126,18 @@ object SeikiMain : KotlinPlugin(
                     getOrWaitImage()!!
                 )
             }
+            """#5k<([\s\S]*)><([\s\S]*)>""".toRegex() finding {
+                val (top, bottom) = it.destructured
+                with (FiveK) {
+                    sender.asCommandSender(isTemp = false).handle(top, bottom)
+                }
+            }
+            """#osu<([\s\S]+)>""".toRegex() finding {
+                val (text) = it.destructured
+                with (Osu) {
+                    sender.asCommandSender(isTemp = false).handle(text)
+                }
+            }
             """\s*击剑\s*""".toRegex() finding {
                 kotlin.runCatching {
                     Fencing.execute(
@@ -132,12 +149,12 @@ object SeikiMain : KotlinPlugin(
             "error" reply { throw Exception("www") }
         }
         eventChannel.subscribeAlways<BotOnlineEvent> {
-            jobTimeTick = launch {
+            jobTimeTick = if (useTimeTickEvent) launch {
                 while (true) {
                     TimeTickEvent(bot, System.currentTimeMillis()).broadcast()
                     delay(999L)
                 }
-            }
+            } else launch {}
         } // bot上线
         eventChannel.subscribeAlways<BotInvitedJoinGroupRequestEvent> {
             if (invitorId in ownerList) launch {
@@ -209,7 +226,6 @@ object SeikiMain : KotlinPlugin(
             }
         } // 管理权限改变
     }
-
     override fun onDisable() {
         jobTimeTick.cancel()
         super.onDisable()

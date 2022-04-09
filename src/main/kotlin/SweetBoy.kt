@@ -1,4 +1,4 @@
-@file:Suppress("unused")
+@file:Suppress("unused","MemberVisibilityCanBePrivate")
 
 package org.seiki
 
@@ -26,7 +26,11 @@ object SweetBoy {
      * @return okhttp给我返回了什么我就返回什么捏😋
      */
     suspend fun get(url: String): Response =
-        withContext(Dispatchers.IO) { okHttpClient.newCall(Request.Builder().url(url).build()).execute() }
+        withContext(Dispatchers.IO) {
+            okHttpClient.newCall(Request.Builder().url(
+                if (url.startsWith("https")) "http${url.substringAfter("https")}" else url
+            ).build()).execute()
+        }
 
     /**
      * okhttp POST请求

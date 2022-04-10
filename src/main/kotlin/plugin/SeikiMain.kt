@@ -41,8 +41,7 @@ object SeikiMain : KotlinPlugin(
     val audioFolder = dataFolder.resolve("audio")
     val resFolder = dataFolder.resolve("res")
 
-    private const val botName = "\uD835\uDE82\uD835\uDE8E\uD835\uDE92\uD835\uDE94\uD835\uDE92 \uD835\uDE71\uD835\uDE98\uD835\uDE9D"
-    private const val useTimeTickEvent = false
+    private const val useTimeTickEvent = true
 
     private lateinit var jobTimeTick: Job
 
@@ -50,7 +49,7 @@ object SeikiMain : KotlinPlugin(
     override fun onEnable() {
         logger.info { "Seiki Main loaded" }
         val commandList: List<Command> = listOf(
-            Ping, Gpbt, Form, Two, Dazs, Kfc, Diana, Yiyan, Nbnhhsh, Baike, Bottle, Fencing, Moyu,
+            Ping, Gpbt, Form, Two, Dazs, Kfc, Diana, Yiyan, Nbnhhsh, Baike, Bottle, Fencing, Moyu, org.seiki.plugin.command.plain.Yinglish,
             Diu, Tian, Bishi, Pa, Zan, Love, Qian, Draw,
             Osu, PronHub, FiveK, BlackWhite, Zero,
             Setu, Aotu, Cosplay,
@@ -71,10 +70,10 @@ object SeikiMain : KotlinPlugin(
                                 json.meta.detail_1.qqdocurl.substringBefore('?')
                             ).request.url.toString()
                             val bv = url.matchRegexOrFail(biliUrlRegex)[1]
-                            subject.sendMessage(subject.bili(bv))
+                            subject.bili(bv).sendTo(subject)
                         }
                     }.onFailure { logger.info { "不是B站小程序" } }
-                    kotlin.runCatching {
+                    runCatching {
                         val json = gson.fromJson(it.content, BiliApp::class.java)
                         if (json.meta.news.appid == 1105517988) {
                             val url = SweetBoy.get(json.meta.news.jumpUrl).request.url.toString()
@@ -128,13 +127,13 @@ object SeikiMain : KotlinPlugin(
             }
             """#5k<([\s\S]*)><([\s\S]*)>""".toRegex() finding {
                 val (top, bottom) = it.destructured
-                with (FiveK) {
+                with(FiveK) {
                     sender.asCommandSender(isTemp = false).handle(top, bottom)
                 }
             }
             """#osu<([\s\S]+)>""".toRegex() finding {
                 val (text) = it.destructured
-                with (Osu) {
+                with(Osu) {
                     sender.asCommandSender(isTemp = false).handle(text)
                 }
             }
@@ -146,7 +145,7 @@ object SeikiMain : KotlinPlugin(
                     )
                 }
             }
-            "error" reply { throw Exception("www") }
+            """#consolas ([\s\S]+)""".toRegex() findingReply { it.groupValues[1].consolas }
         }
         eventChannel.subscribeAlways<BotOnlineEvent> {
             jobTimeTick = if (useTimeTickEvent) launch {
@@ -165,7 +164,7 @@ object SeikiMain : KotlinPlugin(
         eventChannel.subscribeAlways<BotJoinGroupEvent> {
             launch {
                 delay(100L)
-                group.sendMessage("这里是$botName.发送\"# help\"来康教程.")
+                group.sendMessage("这里是${"Seiki".consolas}.发送\"# help\"来康教程.")
             }
         } // bot进群
         eventChannel.subscribeAlways<NudgeEvent> {
@@ -226,6 +225,7 @@ object SeikiMain : KotlinPlugin(
             }
         } // 管理权限改变
     }
+
     override fun onDisable() {
         jobTimeTick.cancel()
         super.onDisable()

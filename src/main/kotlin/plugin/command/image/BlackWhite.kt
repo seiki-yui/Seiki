@@ -54,6 +54,6 @@ object BlackWhite : SimpleCommand(
                 h + ((foo + text.height) / 2),
                 paint.apply { color = Color.WHITE })
         }
-        surface.makeImageSnapshot().toExternalResource().sendAsImageTo(subject)
+        surface.makeImageSnapshot().toExternalResource().use { it.sendAsImageTo(subject) }
     }
 }

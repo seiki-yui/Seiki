@@ -9,7 +9,9 @@ import net.mamoe.mirai.message.data.messageChainOf
 import org.seiki.SweetBoy
 import org.seiki.SweetBoy.matchRegexOrFail
 import org.seiki.SweetBoy.transToNumString
+import org.seiki.SweetBoy.transToTime
 import org.seiki.plugin.uploadAsImage
+import java.awt.Dimension
 
 suspend fun Contact.bili(id: String): MessageChain {
     val isBv = if ("""[bB][vV][a-zA-Z0-9]+""".toRegex().matches(id)) true
@@ -19,29 +21,34 @@ suspend fun Contact.bili(id: String): MessageChain {
         id.matchRegexOrFail("""[bB][vV]([a-zA-Z0-9]+)""".toRegex())[1]
     else
         id.matchRegexOrFail("""[aA][vV](\d+)""".toRegex())[1]
-    val result1 =
-        SweetBoy.get("https://api.bilibili.com/x/web-interface/view?${if (isBv) "bv" else "a"}id=$id2")
-    val json = Gson().fromJson(result1.body!!.string(), BiliApi::class.java)
-    val result2 = json?.let { bili ->
-        return@let if (bili.code == 0) {
-            buildMessageChain {
-                +this@bili.uploadAsImage(bili.data.pic)
-                +PlainText(bili.data.title + "\n")
-                +PlainText("https://www.bilibili.com/video/${(if (isBv) "av${bili.data.aid}" else bili.data.bvid)}/\n")
-                +PlainText("观看:${bili.data.stat.view.transToNumString(1)} ")
-                +PlainText("点赞:${bili.data.stat.like.transToNumString(1)} ")
-                +PlainText("弹幕:${bili.data.stat.danmaku.transToNumString(1)} ")
-                +PlainText("投币:${bili.data.stat.coin.transToNumString(1)} ")
-                +PlainText("收藏:${bili.data.stat.favorite.transToNumString(1)} ")
-                +PlainText("分享:${bili.data.stat.share.transToNumString(1)} ")
-                +PlainText("评论:${bili.data.stat.reply.transToNumString(1)} ")
-                +PlainText((if (bili.data.copyright == 1) "自制" else "转载") + "\n")
-                +PlainText("UP主: ${bili.data.owner.name} UID:${bili.data.owner.mid}\n")
-                +PlainText(bili.data.desc)
-            }
-        } else messageChainOf(PlainText(bili.message))
-    } ?: messageChainOf(PlainText(""))
-    return result2
+    val rel1 =
+        SweetBoy.get("http://api.bilibili.com/x/web-interface/view?${if (isBv) "bv" else "a"}id=$id2")
+    val rel2 =
+        SweetBoy.get("http://api.bilibili.com/x/web-interface/search/all/v2?keyword=${if (isBv) "BV" else "av"}$id2")
+    val json1 = Gson().fromJson(rel1.body!!.string(), BiliApi::class.java)
+    val json2 = Gson().fromJson(rel2.body!!.string(), BiliSearchApi::class.java)
+    val data1 = json1.data
+    val data2 = json2.data.result[json2.data.result.size - 1].data[1]
+    return (
+            if (json1.code == 0) {
+                buildMessageChain {
+                    +this@bili.uploadAsImage(json1.data.pic)
+                    +PlainText(json1.data.title + "\n")
+                    +PlainText("https://www.bilibili.com/video/${json1.data.bvid}/\n")
+                    +PlainText("${data1.bvid} * AV${data1.aid}\n")
+                    +PlainText("[${data2.typename}] [${if (data1.copyright == 1) "自制" else "转载"}] [${data2.tag}]\n")
+                    +PlainText("[投稿] ${(data2.pubdate * 1000L).transToTime()} [时长] ${data2.duration}\n")
+                    +PlainText("[观看] ${data1.stat.view.transToNumString(1)} ")
+                    +PlainText("[弹幕] ${data1.stat.danmaku.transToNumString(1)} ")
+                    +PlainText("[点赞] ${data1.stat.like.transToNumString(1)} ")
+                    +PlainText("[投币] ${data1.stat.coin.transToNumString(1)} ")
+                    +PlainText("[收藏] ${data1.stat.favorite.transToNumString(1)} ")
+                    +PlainText("[分享] ${data1.stat.share.transToNumString(1)}\n")
+                    +PlainText("[评论] ${data1.stat.reply.transToNumString(1)} ")
+                    +PlainText("[UP主] ${data1.owner.name} [UID] ${json1.data.owner.mid}\n")
+                    +PlainText(json1.data.desc)
+                }
+            } else messageChainOf(PlainText(json1.message)))
 }
 
 data class BiliLight(
@@ -133,12 +140,6 @@ data class DescV2(
     val biz_id: Int,
     val raw_text: String,
     val type: Int
-)
-
-data class Dimension(
-    val height: Int,
-    val rotate: Int,
-    val width: Int
 )
 
 data class HonorReply(
@@ -254,4 +255,59 @@ data class News(
     val tag: String,
     val title: String,
     val uin: Int
+)
+
+data class BiliSearchApi(
+    val code: Int,
+    val `data`: Data2,
+    val message: String,
+    val ttl: Int
+)
+
+data class Data2(
+    val result: List<Result>
+)
+
+data class Result(
+    val `data`: List<DataX>,
+    val result_type: String
+)
+
+data class DataX(
+    val aid: Int,
+    val arcrank: String,
+    val arcurl: String,
+    val author: String,
+    val badgepay: Boolean,
+    val bvid: String,
+    val corner: String,
+    val cover: String,
+    val desc: String,
+    val description: String,
+    val duration: String,
+    val favorites: Int,
+    val hit_columns: List<Any>,
+    val id: Int,
+    val is_pay: Int,
+    val is_union_video: Int,
+    val like: Int,
+    val mid: Int,
+    val new_rec_tags: List<Any>,
+    val pic: String,
+    val play: Int,
+    val pubdate: Int,
+    val rank_score: Int,
+    val rec_reason: String,
+    val rec_tags: Any,
+    val review: Int,
+    val senddate: Int,
+    val tag: String,
+    val title: String,
+    val type: String,
+    val typeid: String,
+    val typename: String,
+    val upic: String,
+    val url: String,
+    val video_review: Int,
+    val view_type: String
 )

@@ -17,7 +17,7 @@ object Zero : SimpleCommand(
     description = "生成0%加载图片"
 ) {
     @Handler
-    suspend fun UserCommandSender.handle(image: Image? = null) {
+    suspend fun UserCommandSender.handle(number: Int? = 0, image: Image? = null) {
         if (image == null) return
 
         val skikoImage =
@@ -26,7 +26,7 @@ object Zero : SimpleCommand(
         val h21 = (skikoImage.height shr 1).toFloat()
         val radius = min(w21, h21) * .24f
 
-        val text = TextLine.make("0%", Fonts["MiSans-Regular.ttf", radius * .6f])
+        val text = TextLine.make("$number%", Fonts["MiSans-Regular.ttf", radius * .6f])
         Surface.makeRaster(skikoImage.imageInfo).apply {
             val paint = Paint().apply {
                 isAntiAlias = true
@@ -35,10 +35,11 @@ object Zero : SimpleCommand(
             canvas.apply {
                 clear(Color.BLACK)
                 drawImage(skikoImage, 0F, 0F, paint.apply {
-                    alpha = 160
+                    alpha = 155
                 })
                 drawCircle(w21, h21, radius, paint.apply {
                     mode = PaintMode.STROKE
+                    alpha = 255
                     strokeWidth = radius * .19f
                     maskFilter = MaskFilter.makeBlur(FilterBlurMode.SOLID, radius * .2f)
                 })
@@ -48,7 +49,7 @@ object Zero : SimpleCommand(
                 })
             }
 
-            makeImageSnapshot().toExternalResource().sendAsImageTo(subject)
+            makeImageSnapshot().toExternalResource().use { it.sendAsImageTo(subject) }
         }
     }
 }

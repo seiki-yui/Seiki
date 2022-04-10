@@ -191,7 +191,7 @@ object FiveK : SimpleCommand(
 
         }
         withContext(Dispatchers.IO) {
-            surface.makeImageSnapshot().toExternalResource().sendAsImageTo(subject)
+            surface.makeImageSnapshot().toExternalResource().use { it.sendAsImageTo(subject) }
         }
     }
 }

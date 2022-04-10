@@ -42,6 +42,6 @@ object Osu : SimpleCommand(
                 drawTextLine(osuText, 175F - osuText.width / 2, yPos, paint)
             }
         }
-        surface.makeImageSnapshot().toExternalResource().sendAsImageTo(subject)
+        surface.makeImageSnapshot().toExternalResource().use { it.sendAsImageTo(subject) }
     }
 }

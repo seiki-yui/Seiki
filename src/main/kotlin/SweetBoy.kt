@@ -1,4 +1,4 @@
-@file:Suppress("unused","MemberVisibilityCanBePrivate")
+@file:Suppress("unused", "MemberVisibilityCanBePrivate")
 
 package org.seiki
 
@@ -9,7 +9,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import java.io.File
-import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.concurrent.TimeUnit
 
@@ -27,9 +26,11 @@ object SweetBoy {
      */
     suspend fun get(url: String): Response =
         withContext(Dispatchers.IO) {
-            okHttpClient.newCall(Request.Builder().url(
-                if (url.startsWith("https")) "http${url.substringAfter("https")}" else url
-            ).build()).execute()
+            okHttpClient.newCall(
+                Request.Builder().url(
+                    if (url.startsWith("https")) "http${url.substringAfter("https")}" else url
+                ).build()
+            ).execute()
         }
 
     /**
@@ -58,16 +59,16 @@ object SweetBoy {
      * @param url 文件URL
      * @param path 储存文件的位置
      */
-    suspend fun downloadFile(url: String, path: String): File = withContext(Dispatchers.IO) {
-        val inputStream = get(url).body!!.byteStream()
-        val file = File(path)
-        FileOutputStream(file).apply {
-            write(inputStream.readBytes());flush();close()
+    suspend fun downloadFile(url: String, path: String): File = get(url).body!!.use {
+        val inputStream = it.byteStream()
+        return File(path).apply {
+            this.outputStream().apply {
+                write(inputStream.readBytes());flush();close()
+            }
         }
-        return@withContext file
     }
 
-    suspend fun downloadAsByteStream(url: String) = withContext(Dispatchers.IO) { get(url).body!!.byteStream() }
+    suspend fun downloadAsByteStream(url: String) = get(url).body!!.use { it.byteStream() }
 
     /**
      * 根据文件夹路径与后缀名来检索

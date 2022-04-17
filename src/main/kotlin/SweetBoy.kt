@@ -59,16 +59,16 @@ object SweetBoy {
      * @param url 文件URL
      * @param path 储存文件的位置
      */
-    suspend fun downloadFile(url: String, path: String): File = get(url).body!!.use {
-        val inputStream = it.byteStream()
-        return File(path).apply {
+    suspend fun getFile(url: String, path: String): File =
+        File(path).apply {
             this.outputStream().apply {
-                write(inputStream.readBytes());flush();close()
+                write(get(url).body!!.byteStream().readBytes())
+                flush()
+                close()
             }
         }
-    }
 
-    suspend fun downloadAsByteStream(url: String) = get(url).body!!.use { it.byteStream() }
+    suspend fun getStream(url: String) = get(url).body!!.byteStream()
 
     /**
      * 根据文件夹路径与后缀名来检索

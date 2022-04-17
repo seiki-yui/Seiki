@@ -19,6 +19,7 @@ import net.mamoe.mirai.event.globalEventChannel
 import net.mamoe.mirai.event.subscribeMessages
 import net.mamoe.mirai.message.data.*
 import net.mamoe.mirai.utils.info
+import org.laolittle.plugin.SkikoConfig
 import org.seiki.SweetBoy
 import org.seiki.SweetBoy.matchRegexOrFail
 import org.seiki.SweetBoy.transToTime
@@ -36,8 +37,13 @@ object SeikiMain : KotlinPlugin(
         id = "org.seiki.main",
         version = "1.0-SNAPSHOT",
         name = "Seiki Main"
-    )
+    ) {
+        author("xiao-zheng233")
+        dependsOn("org.laolittle.plugin.SkikoMirai", ">=1.0.3", true)
+    }
 ) {
+
+
     val audioFolder = dataFolder.resolve("audio")
     val resFolder = dataFolder.resolve("res")
 
@@ -47,13 +53,41 @@ object SeikiMain : KotlinPlugin(
 
     @OptIn(ExperimentalCommandDescriptors::class, ConsoleExperimentalApi::class)
     override fun onEnable() {
+        logger.info { SkikoConfig.skikoLibPath }
         logger.info { "Seiki Main loaded" }
         val commandList: List<Command> = listOf(
-            Ping, Gpbt, Form, Two, Dazs, Kfc, Diana, Yiyan, Nbnhhsh, Baike, Bottle, Fencing, Moyu, org.seiki.plugin.command.plain.Yinglish,
-            Diu, Tian, Bishi, Pa, Zan, Love, Qian, Draw,
-            Osu, PronHub, FiveK, BlackWhite, Zero,
-            Setu, Aotu, Cosplay,
-            Audio, Say
+            Ping,
+            Gpbt,
+            Form,
+            Two,
+            Dazs,
+            Kfc,
+            Diana,
+            Yiyan,
+            Nbnhhsh,
+            Baike,
+            Bottle,
+            Fencing,
+            Moyu,
+            org.seiki.plugin.command.plain.Yinglish,
+            Diu,
+            Tian,
+            Bishi,
+            Pa,
+            Zan,
+            Love,
+            Qian,
+            Draw,
+            Osu,
+            PronHub,
+            FiveK,
+            BlackWhite,
+            Zero,
+            Setu,
+            Aotu,
+            Cosplay,
+            Audio,
+            Say
         )
         commandList.forEach {
             CommandManager.registerCommand(it)
@@ -103,10 +137,12 @@ object SeikiMain : KotlinPlugin(
                 val (url) = it.destructured
                 subject.bili(SweetBoy.get(url).request.url.toString().matchRegexOrFail(biliUrlRegex)[1])
             }
-            """#0%?""".toRegex() finding {
+            """#0%?(?:\s+(\d+))?""".toRegex() finding {
+                // TODO("可选数字 in Command")
+                val (num) = it.destructured
                 if (message.findIsInstance<Image>() == null) Zero.execute(
                     sender.asCommandSender(isTemp = false),
-                    getOrWaitImage()!!
+                    PlainText(num), getOrWaitImage()!!
                 )
             }
             """#bw ([\s\S]+)""".toRegex() finding {

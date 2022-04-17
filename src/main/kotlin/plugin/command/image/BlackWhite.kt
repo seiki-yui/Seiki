@@ -1,7 +1,5 @@
 package org.seiki.plugin.command.image
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import net.mamoe.mirai.console.command.SimpleCommand
 import net.mamoe.mirai.console.command.UserCommandSender
 import net.mamoe.mirai.message.data.Image
@@ -10,8 +8,8 @@ import net.mamoe.mirai.utils.ExternalResource.Companion.sendAsImageTo
 import org.jetbrains.skia.*
 import org.laolittle.plugin.Fonts
 import org.laolittle.plugin.toExternalResource
+import org.seiki.SweetBoy
 import org.seiki.plugin.SeikiMain
-import java.net.URL
 
 object BlackWhite : SimpleCommand(
     SeikiMain, "bw",
@@ -21,12 +19,11 @@ object BlackWhite : SimpleCommand(
     suspend fun UserCommandSender.handle(content: String = "", image: Image? = null) {
         if (image == null) return
 
-        val skikoImage = withContext(Dispatchers.IO) {
-            URL(image.queryUrl()).openStream().use { input ->
-                requireNotNull(input)
+        val skikoImage = /*withContext(Dispatchers.IO) {*/
+            SweetBoy.getStream(image.queryUrl()).use { input ->
                 org.jetbrains.skia.Image.makeFromEncoded(input.readBytes())
             }
-        }
+//        }
         val paint = Paint().apply {
             isAntiAlias = true
         }

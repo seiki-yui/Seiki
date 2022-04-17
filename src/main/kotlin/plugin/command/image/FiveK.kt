@@ -15,7 +15,9 @@ object FiveK : SimpleCommand(
     description = "生成五千兆图片"
 ) {
     /**
-     * @author Cssxsh
+     * [5000choyen](https://github.com/yurafuca/5000choyen)
+     * kotlin ver made by @cssxsh
+     * @author yurafuca
      */
     @Handler
     suspend fun UserCommandSender.handle(top: String? = "", bottom: String? = "") {

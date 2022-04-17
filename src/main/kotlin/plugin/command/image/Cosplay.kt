@@ -21,7 +21,7 @@ object Cosplay : SimpleCommand(
     suspend fun UserCommandSender.handle() {
         val json =
             Gson().fromJson(SweetBoy.get("http://ovooa.com/API/cosplay/").body!!.string(), Cosplay::class.java)
-        if (json.code == "1") /*kotlin.runCatching*/ {
+        if (json.code == "1") {
             val start = System.currentTimeMillis()
             val data = json.data.data
             sendMessage(if (data.size >= 100) "oh shit 图片超过100张！" else "有${data.size}张图片待发送，请稍等……")
@@ -45,9 +45,7 @@ object Cosplay : SimpleCommand(
                 }
             }.sendTo(subject)
             sendMessage("总用时: ${(start - System.currentTimeMillis() / 1000.0).transToNumString(2)}")
-        }/*.onFailure {
-            sendMessage("Cosplay功能发生了一点点差错……\n${it.javaClass.name}")
-        }*/
+        }
     }
 
     data class Cosplay(

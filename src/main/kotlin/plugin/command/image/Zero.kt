@@ -21,7 +21,7 @@ object Zero : SimpleCommand(
         if (image == null) return
 
         val skikoImage =
-            org.jetbrains.skia.Image.makeFromEncoded(SweetBoy.downloadAsByteStream(image.queryUrl()).readBytes())
+            org.jetbrains.skia.Image.makeFromEncoded(SweetBoy.getStream(image.queryUrl()).use { it.readBytes() })
         val w21 = (skikoImage.width shr 1).toFloat()
         val h21 = (skikoImage.height shr 1).toFloat()
         val radius = min(w21, h21) * .24f

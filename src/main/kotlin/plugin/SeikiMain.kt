@@ -19,7 +19,7 @@ import net.mamoe.mirai.event.globalEventChannel
 import net.mamoe.mirai.event.subscribeMessages
 import net.mamoe.mirai.message.data.*
 import net.mamoe.mirai.utils.info
-import org.laolittle.plugin.SkikoConfig
+import org.jetbrains.skia.Paint
 import org.seiki.SweetBoy
 import org.seiki.SweetBoy.matchRegexOrFail
 import org.seiki.SweetBoy.transToTime
@@ -39,13 +39,12 @@ object SeikiMain : KotlinPlugin(
         name = "Seiki Main"
     ) {
         author("xiao-zheng233")
-        dependsOn("org.laolittle.plugin.SkikoMirai", ">=1.0.3", true)
+//        dependsOn("org.laolittle.plugin.SkikoMirai", ">=1.0.3", true)
     }
 ) {
 
 
     val audioFolder = dataFolder.resolve("audio")
-    val resFolder = dataFolder.resolve("res")
 
     private const val useTimeTickEvent = true
 
@@ -53,7 +52,7 @@ object SeikiMain : KotlinPlugin(
 
     @OptIn(ExperimentalCommandDescriptors::class, ConsoleExperimentalApi::class)
     override fun onEnable() {
-        logger.info { SkikoConfig.skikoLibPath }
+        logger.info { Paint::class.java.name }
         logger.info { "Seiki Main loaded" }
         val commandList: List<Command> = listOf(
             Ping,
@@ -69,7 +68,7 @@ object SeikiMain : KotlinPlugin(
             Bottle,
             Fencing,
             Moyu,
-            org.seiki.plugin.command.plain.Yinglish,
+            Yinglish,
             Diu,
             Tian,
             Bishi,
@@ -138,11 +137,10 @@ object SeikiMain : KotlinPlugin(
                 subject.bili(SweetBoy.get(url).request.url.toString().matchRegexOrFail(biliUrlRegex)[1])
             }
             """#0%?(?:\s+(\d+))?""".toRegex() finding {
-                // TODO("可选数字 in Command")
                 val (num) = it.destructured
                 if (message.findIsInstance<Image>() == null) Zero.execute(
                     sender.asCommandSender(isTemp = false),
-                    PlainText(num), getOrWaitImage()!!
+                    getOrWaitImage()!!,PlainText(num)
                 )
             }
             """#bw ([\s\S]+)""".toRegex() finding {
@@ -266,37 +264,4 @@ object SeikiMain : KotlinPlugin(
         jobTimeTick.cancel()
         super.onDisable()
     }
-/*    TODO("Logger覆写")
-//    override fun PluginComponentStorage.onLoad() {
-//        this.contributeBotConfigurationAlterer { botId, config ->
-//            config.apply {
-//                botLoggerSupplier = {
-//                    object : MiraiLogger by MiraiLogger.Factory.create(Bot::class) {
-//                        override fun error(message: String?, e: Throwable?) {
-//                            e?.printStackTrace()
-//                            Bot.findInstance(botId)?.let {
-//                                launch {
-//                                    it.getGroup(813089162L)?.sendMessage(message ?: "unknown")
-//                                }
-//                            }
-//                            error(message)
-//                        }
-//
-//                        override fun error(message: String?) {
-//                            Bot.findInstance(botId)?.let {
-//                                launch {
-//                                    it.getGroup(813089162L)?.sendMessage(message ?: "unknown")
-//                                }
-//                            }
-//                        }
-//
-//                        override val isVerboseEnabled: Boolean get() = true
-//                        override val isInfoEnabled: Boolean get() = true
-//                        override val isWarningEnabled: Boolean get() = true
-//                        override val isDebugEnabled: Boolean get() = true
-//                    }
-//                }
-//            }
-//        }
-//    } */
 }

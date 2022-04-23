@@ -1,23 +1,26 @@
 𝚂𝚎𝚒𝚔𝚒 𝙱𝚘𝚝
 
+MIRAI 2.10.1
+LISTEN GNU-APGL3
+VER 1.0
+
 # Seiki Main
 
 JAR Seiki-1.0-SNAPSHOT.mirai.jar
 PACK org.seiki.plugin
 ID org.seiki.main
-DEP Gson,SkikoMirai
+VER 1.0
+DEP Gson,SkikoMirai,JiebaAnalysis
 
 # Seiki Admin
 
 JAR SeikiAdmin-1.0-SNAPSHOT.mirai.jar
 PACK org.seiki.plugin.admin
 ID org.seiki.admin
+VER 1.0
 DEP org.seiki.plugin
 
-'''
-#perm permit u* org.seiki.main:*
-#perm permit u2630557998 *:*
-'''
+// 不定时更新 具体源码为准
 
 # ping 
 
@@ -166,3 +169,39 @@ ARG 曲名[MSG],类型[TYPE](json|xml)
 USE # music wy
 GET https://ovooa.com/API/wydg/api2.php?n=1&msg=[MSG]&type=[TYPE]
 ARG 曲名[MSG],类型[TYPE](json|xml)
+
+一些废物
+
+/*
+//    override fun PluginComponentStorage.onLoad() {
+//        this.contributeBotConfigurationAlterer { botId, config ->
+//            config.apply {
+//                botLoggerSupplier = {
+//                    object : MiraiLogger by MiraiLogger.Factory.create(Bot::class) {
+//                        override fun error(message: String?, e: Throwable?) {
+//                            e?.printStackTrace()
+//                            Bot.findInstance(botId)?.let {
+//                                launch {
+//                                    it.getGroup(813089162L)?.sendMessage(message ?: "unknown")
+//                                }
+//                            }
+//                            error(message)
+//                        }
+//
+//                        override fun error(message: String?) {
+//                            Bot.findInstance(botId)?.let {
+//                                launch {
+//                                    it.getGroup(813089162L)?.sendMessage(message ?: "unknown")
+//                                }
+//                            }
+//                        }
+//
+//                        override val isVerboseEnabled: Boolean get() = true
+//                        override val isInfoEnabled: Boolean get() = true
+//                        override val isWarningEnabled: Boolean get() = true
+//                        override val isDebugEnabled: Boolean get() = true
+//                    }
+//                }
+//            }
+//        }
+//    } */

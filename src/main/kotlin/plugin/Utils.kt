@@ -140,7 +140,7 @@ val String.consolas: String
 /**
  * @author LaoLittle鸽鸽♡
  */
-object Yinglish {
+object YinglishUtil {
     val String.yinglish get() = this.chs2yin(50)
     fun String.chs2yin(yingLevel: Int): String {
         val b = JiebaSegmenter().process(this, JiebaSegmenter.SegMode.SEARCH)

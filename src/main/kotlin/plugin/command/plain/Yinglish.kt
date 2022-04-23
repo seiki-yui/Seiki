@@ -3,7 +3,7 @@ package org.seiki.plugin.command.plain
 import net.mamoe.mirai.console.command.SimpleCommand
 import net.mamoe.mirai.console.command.UserCommandSender
 import org.seiki.plugin.SeikiMain
-import org.seiki.plugin.Yinglish.yinglish
+import org.seiki.plugin.YinglishUtil.yinglish
 
 object Yinglish : SimpleCommand(
     SeikiMain, "yinglish",

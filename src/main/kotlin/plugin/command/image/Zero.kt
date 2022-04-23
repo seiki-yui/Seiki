@@ -17,7 +17,7 @@ object Zero : SimpleCommand(
     description = "生成0%加载图片"
 ) {
     @Handler
-    suspend fun UserCommandSender.handle(number: Int? = 0, image: Image? = null) {
+    suspend fun UserCommandSender.handle(image: Image? = null, number: Int? = 0) {
         if (image == null) return
 
         val skikoImage =

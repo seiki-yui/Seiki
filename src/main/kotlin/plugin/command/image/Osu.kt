@@ -10,13 +10,12 @@ import org.jetbrains.skia.TextLine
 import org.laolittle.plugin.Fonts
 import org.laolittle.plugin.toExternalResource
 import org.seiki.plugin.SeikiMain
-import org.seiki.plugin.SeikiMain.resFolder
-import java.io.File
 
 object Osu : SimpleCommand(
     SeikiMain, "osu",
     description = "生成OSU风格的图标"
 ) {
+    private val res: ByteArray = SeikiMain::class.java.getResourceAsStream("/osuLogo.png")!!.use { it.readAllBytes() }
     /**
      * @author xiao_zheng
      * 自己写的 哼o(´^｀)o
@@ -28,7 +27,7 @@ object Osu : SimpleCommand(
             color = Color.WHITE
         }
         val image =
-            org.jetbrains.skia.Image.makeFromEncoded(File("$resFolder/osuLogo.png").readBytes())
+            org.jetbrains.skia.Image.makeFromEncoded(res)
         var osuText = TextLine.make(text, Fonts["Aller-Bold.ttf", 112.5F])
         var yPos = 137.5F + osuText.height / 2
         if (osuText.width > 250) {

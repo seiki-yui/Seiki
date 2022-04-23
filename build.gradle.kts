@@ -18,7 +18,7 @@ repositories {
     mavenCentral()
 }
 
-val legacy: Boolean = false
+val legacy: Boolean = true
 
 fun skikoAwt(ver: String) = "org.jetbrains.skiko:skiko-awt-runtime-$ver"
 
@@ -26,7 +26,7 @@ dependencies {
     implementation("com.google.code.gson:gson:2.9.0")
 
     if (legacy) {
-        val skikoVer = "0.7.12"
+        val skikoVer = "0.7.16"
         implementation(skikoAwt("windows-x64:$skikoVer"))
         implementation(skikoAwt("linux-x64:$skikoVer"))
         implementation(skikoAwt("linux-arm64:$skikoVer"))

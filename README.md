@@ -8,3 +8,5 @@
 ## 使用到的功能
 - [银语翻译](https://github.com/LaoLittle/yinglish-kt)
 - [DrawMeme](https://github.com/LaoLittle/DrawMeme)
+
+自用项目，使用 SkikoMirai 1.0.3 旧版本保证兼容 Windows7

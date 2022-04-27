@@ -1,12 +1,19 @@
 # Seiki
-一个mirai-console的QQBot。  
+一个`mirai-console`的QQBot。  
+
+## @TODO
+- [ ] 修复nbnhhsh,aotu功能的无端报错
+- [ ] 开启setu功能的使用
+- [ ] 新增制作聊天记录
+- [ ] 完成B站动态的XML卡片解析,完成网易云的XML卡片解析
+- [ ] 更改B站视频解析的样式
 
 ## 需要的依赖
-- [SkikoMirai](https://github.com/LaoLittle/SkikoMirai)
-- [JiebaAnalysis](https://github.com/huaban/jieba-analysis)
+- [`SkikoMirai`](https://github.com/LaoLittle/SkikoMirai)
+- [`JiebaAnalysis`](https://github.com/huaban/jieba-analysis)
 
 ## 使用到的功能
 - [银语翻译](https://github.com/LaoLittle/yinglish-kt)
 - [DrawMeme](https://github.com/LaoLittle/DrawMeme)
 
-自用项目，使用 SkikoMirai 1.0.3 旧版本保证兼容 Windows7
+自用项目，使用 `SkikoMirai 1.0.2` 版本保证兼容 `Windows7`

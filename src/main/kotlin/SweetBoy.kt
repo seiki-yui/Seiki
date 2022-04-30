@@ -4,19 +4,22 @@ package org.seiki
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import net.mamoe.mirai.utils.info
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
+import org.seiki.plugin.SeikiMain
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.concurrent.TimeUnit
 
 object SweetBoy {
     private val okHttpClient: OkHttpClient = OkHttpClient.Builder()
-        .readTimeout(30, TimeUnit.SECONDS)
-        .writeTimeout(30, TimeUnit.SECONDS)
-        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(5, TimeUnit.SECONDS)
+        .writeTimeout(5, TimeUnit.SECONDS)
+        .connectTimeout(5, TimeUnit.SECONDS)
+        .retryOnConnectionFailure(true)
         .build()
 
     /**
@@ -27,9 +30,7 @@ object SweetBoy {
     suspend fun get(url: String): Response =
         withContext(Dispatchers.IO) {
             okHttpClient.newCall(
-                Request.Builder().url(
-                    if (url.startsWith("https")) "http${url.substringAfter("https")}" else url
-                ).build()
+                Request.Builder().url(url).build()
             ).execute()
         }
 
@@ -44,6 +45,7 @@ object SweetBoy {
             val builder = FormBody.Builder()
             for (key in hashMap.keys) {
                 builder.add(key, hashMap[key]!!)
+                SeikiMain.logger.info { "$key : ${hashMap[key]!!}" }
             }
             val formBody = builder.build()
             return@withContext okHttpClient.newCall(

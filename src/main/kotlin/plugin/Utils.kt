@@ -47,6 +47,18 @@ suspend fun Contact.uploadAsAudio(url: String) =
 suspend fun Contact.uploadAsAudio(file: File) =
     file.toExternalResource().use { (this@uploadAsAudio as AudioSupported).uploadAudio(it) }
 
+suspend fun <T: Contact,R> T.runCatching(block: suspend T.() -> R): Result<R> {
+    return try {
+        Result.success(block())
+    } catch (e: Throwable) {
+        buildMessageChain {
+            +PlainText("Warning! ${e.javaClass.name}: ${e.message}")
+            +Image("{D3A4F304-847D-BB7B-1534-8ABFDC7575B4}.png")
+        }.sendTo(this)
+        Result.failure(e)
+    }
+}
+
 /**
  * @author LaoLittle鸽鸽♡
  */

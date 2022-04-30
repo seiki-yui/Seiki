@@ -43,7 +43,6 @@ object SeikiMain : KotlinPlugin(
     }
 ) {
 
-
     val audioFolder = dataFolder.resolve("audio")
 
     private const val useTimeTickEvent = true
@@ -171,7 +170,7 @@ object SeikiMain : KotlinPlugin(
                     sender.asCommandSender(isTemp = false).handle(text)
                 }
             }
-            """\s*击剑\s*""".toRegex() finding {
+            """\s*#?击剑\s*""".toRegex() finding {
                 kotlin.runCatching {
                     Fencing.execute(
                         sender.asCommandSender(isTemp = false),
@@ -180,6 +179,19 @@ object SeikiMain : KotlinPlugin(
                 }
             }
             """#consolas ([\s\S]+)""".toRegex() findingReply { it.groupValues[1].consolas }
+
+            """#throwable""".toRegex() finding {
+                subject.runCatching { throw Throwable("www") }
+            }
+            """#exception""".toRegex() finding {
+                subject.runCatching { throw Exception("www") }
+            }
+            """#error""".toRegex() finding {
+                subject.runCatching { throw Error("www") }
+            }
+            """#send ([\s\S]+)""".toRegex() findingReply {
+                subject.runCatching { Image(it.groupValues[1]) }
+            }
         }
         eventChannel.subscribeAlways<BotOnlineEvent> {
             jobTimeTick = if (useTimeTickEvent) launch {

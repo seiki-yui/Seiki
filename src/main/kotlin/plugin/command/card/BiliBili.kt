@@ -28,7 +28,7 @@ suspend fun Contact.bili(id: String): MessageChain {
     val json1 = Gson().fromJson(rel1.body!!.string(), BiliApi::class.java)
     val json2 = Gson().fromJson(rel2.body!!.string(), BiliSearchApi::class.java)
     val data1 = json1.data
-    val data2 = json2.data.result[json2.data.result.size - 1].data[1]
+    val data2 = json2.data.result.last().data.first()
     return (
             if (json1.code == 0) {
                 buildMessageChain {
@@ -36,16 +36,16 @@ suspend fun Contact.bili(id: String): MessageChain {
                     +PlainText(json1.data.title + "\n")
                     +PlainText("https://www.bilibili.com/video/${json1.data.bvid}/\n")
                     +PlainText("${data1.bvid} - av${data1.aid}\n")
-                    +PlainText("${data2.typename}-${if (data1.copyright == 1) "自制" else "转载"}(${data2.tag})\n\r")
-                    +PlainText("📅${(data2.pubdate * 1000L).transToTime()} 🕑${data2.duration}\n\r")
+                    +PlainText("${data2.typename}-${if (data1.copyright == 1) "自制" else "转载"}(${data2.tag})\n")
+                    +PlainText("📅${(data2.pubdate * 1000L).transToTime()} 🕑${data2.duration}\n")
                     +PlainText("▶${data1.stat.view.transToNumString(1)} ")
-                    +PlainText("🈂${data1.stat.danmaku.transToNumString(1)}\n\r")
+                    +PlainText("🈂${data1.stat.danmaku.transToNumString(1)}\n")
                     +PlainText("👍${data1.stat.like.transToNumString(1)} ")
                     +PlainText("⭐${data1.stat.favorite.transToNumString(1)} ")
                     +PlainText("💰${data1.stat.coin.transToNumString(1)} ")
-                    +PlainText("↗${data1.stat.share.transToNumString(1)}\n\r")
+                    +PlainText("↗${data1.stat.share.transToNumString(1)}\n")
                     +PlainText("💬${data1.stat.reply.transToNumString(1)} ")
-                    +PlainText("🆙${data1.owner.name} (${json1.data.owner.mid})\n\r")
+                    +PlainText("🆙${data1.owner.name} (${json1.data.owner.mid})\n")
                     +PlainText(json1.data.desc)
                 }
             } else messageChainOf(PlainText(json1.message)))
@@ -74,7 +74,6 @@ data class Config(
 data class Meta(
     val detail_1: Detail1
 )
-
 data class Detail1(
     val appType: Int,
     val appid: String,

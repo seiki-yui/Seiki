@@ -1,7 +1,7 @@
 package org.seiki.plugin.command.image
 
+import net.mamoe.mirai.console.command.MemberCommandSenderOnMessage
 import net.mamoe.mirai.console.command.SimpleCommand
-import net.mamoe.mirai.console.command.UserCommandSender
 import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.Image.Key.queryUrl
 import net.mamoe.mirai.utils.ExternalResource.Companion.sendAsImageTo
@@ -10,6 +10,7 @@ import org.laolittle.plugin.Fonts
 import org.laolittle.plugin.toExternalResource
 import org.seiki.SweetBoy
 import org.seiki.plugin.SeikiMain
+import org.seiki.plugin.getOrWaitImage
 import kotlin.math.min
 
 object Zero : SimpleCommand(
@@ -17,16 +18,16 @@ object Zero : SimpleCommand(
     description = "生成0%加载图片"
 ) {
     @Handler
-    suspend fun UserCommandSender.handle(image: Image? = null, number: Int? = 0) {
-        if (image == null) return
+    suspend fun MemberCommandSenderOnMessage.handle(/*number: Int = 0, */image: Image? = null) {
+        val img = image ?: fromEvent.getOrWaitImage() ?: return
 
         val skikoImage =
-            org.jetbrains.skia.Image.makeFromEncoded(SweetBoy.getStream(image.queryUrl()).use { it.readBytes() })
+            org.jetbrains.skia.Image.makeFromEncoded(SweetBoy.getStream(img.queryUrl()).use { it.readBytes() })
         val w21 = (skikoImage.width shr 1).toFloat()
         val h21 = (skikoImage.height shr 1).toFloat()
         val radius = min(w21, h21) * .24f
 
-        val text = TextLine.make("$number%", Fonts["MiSans-Regular.ttf", radius * .6f])
+        val text = TextLine.make(/*"$number%"*/"0%", Fonts["MiSans-Regular.ttf", radius * .6f])
         Surface.makeRaster(skikoImage.imageInfo).apply {
             val paint = Paint().apply {
                 isAntiAlias = true

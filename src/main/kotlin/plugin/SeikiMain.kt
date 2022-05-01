@@ -8,7 +8,6 @@ import net.mamoe.mirai.console.command.Command
 import net.mamoe.mirai.console.command.CommandManager
 import net.mamoe.mirai.console.command.CommandSender.Companion.asCommandSender
 import net.mamoe.mirai.console.command.descriptor.ExperimentalCommandDescriptors
-import net.mamoe.mirai.console.command.execute
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
@@ -27,6 +26,7 @@ import org.seiki.plugin.command.audio.Audio
 import org.seiki.plugin.command.audio.Say
 import org.seiki.plugin.command.card.BiliApp
 import org.seiki.plugin.command.card.BiliLight
+import org.seiki.plugin.command.card.BuildForward
 import org.seiki.plugin.command.card.bili
 import org.seiki.plugin.command.image.*
 import org.seiki.plugin.command.image.Moyu.moyu
@@ -85,7 +85,8 @@ object SeikiMain : KotlinPlugin(
             Aotu,
             Cosplay,
             Audio,
-            Say
+            Say,
+            BuildForward
         )
         commandList.forEach {
             CommandManager.registerCommand(it)
@@ -135,29 +136,6 @@ object SeikiMain : KotlinPlugin(
                 val (url) = it.destructured
                 subject.bili(SweetBoy.get(url).request.url.toString().matchRegexOrFail(biliUrlRegex)[1])
             }
-            """#0%?(?:\s+(\d+))?""".toRegex() finding {
-                val (num) = it.destructured
-                if (message.findIsInstance<Image>() == null) Zero.execute(
-                    sender.asCommandSender(isTemp = false),
-                    getOrWaitImage()!!,PlainText(num)
-                )
-            }
-            """#bw ([\s\S]+)""".toRegex() finding {
-                val (text) = it.destructured
-                if (message.findIsInstance<Image>() == null) BlackWhite.execute(
-                    sender.asCommandSender(isTemp = false),
-                    buildMessageChain {
-                        +PlainText(text)
-                        +getOrWaitImage()!!
-                    }
-                )
-            }
-            """#draw""".toRegex() finding {
-                if (message.findIsInstance<Image>() == null) Draw.execute(
-                    sender.asCommandSender(isTemp = false),
-                    getOrWaitImage()!!
-                )
-            }
             """#5k<([\s\S]*)><([\s\S]*)>""".toRegex() finding {
                 val (top, bottom) = it.destructured
                 with(FiveK) {
@@ -168,14 +146,6 @@ object SeikiMain : KotlinPlugin(
                 val (text) = it.destructured
                 with(Osu) {
                     sender.asCommandSender(isTemp = false).handle(text)
-                }
-            }
-            """\s*#?击剑\s*""".toRegex() finding {
-                kotlin.runCatching {
-                    Fencing.execute(
-                        sender.asCommandSender(isTemp = false),
-                        messageChainOf(message.findIsInstance<At>()!!)
-                    )
                 }
             }
             """#consolas ([\s\S]+)""".toRegex() findingReply { it.groupValues[1].consolas }

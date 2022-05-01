@@ -1,7 +1,7 @@
 package org.seiki.plugin.command.image
 
+import net.mamoe.mirai.console.command.MemberCommandSenderOnMessage
 import net.mamoe.mirai.console.command.SimpleCommand
-import net.mamoe.mirai.console.command.UserCommandSender
 import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.Image.Key.queryUrl
 import net.mamoe.mirai.utils.ExternalResource.Companion.sendAsImageTo
@@ -10,20 +10,18 @@ import org.laolittle.plugin.Fonts
 import org.laolittle.plugin.toExternalResource
 import org.seiki.SweetBoy
 import org.seiki.plugin.SeikiMain
+import org.seiki.plugin.getOrWaitImage
 
 object BlackWhite : SimpleCommand(
     SeikiMain, "bw",
     description = "生成黑白图"
 ) {
     @Handler
-    suspend fun UserCommandSender.handle(content: String = "", image: Image? = null) {
-        if (image == null) return
+    suspend fun MemberCommandSenderOnMessage.handle(content: String, image: Image? = null) {
+        val img = image ?: fromEvent.getOrWaitImage() ?: return
 
-        val skikoImage = /*withContext(Dispatchers.IO) {*/
-            SweetBoy.getStream(image.queryUrl()).use { input ->
-                org.jetbrains.skia.Image.makeFromEncoded(input.readBytes())
-            }
-//        }
+        val skikoImage =
+            org.jetbrains.skia.Image.makeFromEncoded(SweetBoy.getBytes(img.queryUrl()))
         val paint = Paint().apply {
             isAntiAlias = true
         }

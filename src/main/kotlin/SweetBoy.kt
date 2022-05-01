@@ -72,6 +72,8 @@ object SweetBoy {
 
     suspend fun getStream(url: String) = get(url).body!!.byteStream()
 
+    suspend fun getBytes(url: String) = getStream(url).readBytes()
+
     /**
      * 根据文件夹路径与后缀名来检索
      * @param path 文件夹路径

@@ -52,7 +52,8 @@ suspend fun <T: Contact,R> T.runCatching(block: suspend T.() -> R): Result<R> {
         Result.success(block())
     } catch (e: Throwable) {
         buildMessageChain {
-            +PlainText("Warning! ${e.javaClass.name}: ${e.message}")
+            +PlainText("Warning! ${e.javaClass.name}: ${e.message}\n\r")
+            if (e.cause != null) +PlainText("Caused by: ${e.cause!!.javaClass.name}: ${e.cause!!.message}")
             +Image("{D3A4F304-847D-BB7B-1534-8ABFDC7575B4}.png")
         }.sendTo(this)
         Result.failure(e)
@@ -75,6 +76,19 @@ internal suspend fun MessageEvent.getOrWaitImage(): Image? =
             else -> throw e
         }
     }).firstIsInstanceOrNull<Image>()
+
+internal suspend fun MessageEvent.getOrWait(): MessageChain? =
+    runCatching {
+        this@getOrWait.nextMessage(30_000)
+    }.getOrElse {
+        when (it) {
+            is TimeoutCancellationException -> {
+                messageChainOf(PlainText("超时未发送!"), message.quote()).sendTo(subject)
+                return null
+            }
+            else -> throw it
+        }
+    }
 
 val String.consolas: String
     get() {

@@ -1,11 +1,12 @@
 package org.seiki.plugin.command.image
 
+import net.mamoe.mirai.console.command.MemberCommandSenderOnMessage
 import net.mamoe.mirai.console.command.SimpleCommand
-import net.mamoe.mirai.console.command.UserCommandSender
 import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.Image.Key.queryUrl
 import net.mamoe.mirai.message.data.sendTo
 import org.seiki.plugin.SeikiMain
+import org.seiki.plugin.getOrWaitImage
 import org.seiki.plugin.uploadAsImage
 
 object Draw : SimpleCommand(
@@ -13,8 +14,8 @@ object Draw : SimpleCommand(
     description = "素描"
 ) {
     @Handler
-    suspend fun UserCommandSender.handle(image: Image? = null) {
-        if (image == null) return
-        subject.uploadAsImage("http://ovooa.com/API/xian/?url=${image.queryUrl()}").sendTo(subject)
+    suspend fun MemberCommandSenderOnMessage.handle(image: Image? = null) {
+        val img = image ?: fromEvent.getOrWaitImage() ?: return
+        subject.uploadAsImage("http://ovooa.com/API/xian/?url=${img.queryUrl()}").sendTo(subject)
     }
 }

@@ -107,7 +107,7 @@ object SweetBoy {
      * 数量转中文
      * @return 哈哈
      */
-    fun Number.transToNumString(): String = when (this) {
+    fun Number.transToNum(): String = when (this) {
         in 0..10000 -> this.toString()
         in 10000..100000000 -> "${this.toLong() / 10000}万"
         in 100000000..1000000000000 -> "${this.toLong() / 100000000}亿"
@@ -115,11 +115,11 @@ object SweetBoy {
     }
 
     /**
-     * 数量转中文 同[Number.transToNumString],但是加入保留小数位数。
+     * 数量转中文 同[Number.transToNum],但是加入保留小数位数。
      * @param number 保留的小数位数
      * @return 哈哈
      */
-    fun Number.transToNumString(number: Number): String = when (this) {
+    fun Number.transToNum(number: Number): String = when (this) {
         in 0..10000 -> this.toString()
         in 10000..100000000 -> "${String.format("%.${number}f", (this.toLong() / 10000.0))}万"
         in 100000000..1000000000000 -> "${String.format("%.${number}f", (this.toLong() / 100000000.0))}亿"

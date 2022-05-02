@@ -26,8 +26,9 @@ class TimeTickEvent(
 
 val ownerList = arrayListOf(2630557998L, 1812691029L)
 
-val biliUrlRegex = """(?:(?:https?://)?(?:www\.)?bilibili\.com/video/)?([aA][vV]\d+|[bB][vV][a-zA-Z0-9]+).*""".toRegex()
-val bili23tvRegex = """.*((?:https?://)?(?:www\.)?b23\.tv/[a-zA-Z0-9]+).*""".toRegex()
+val biliUrlRegex = """[\s\S]*(?:(?:https?://)?(?:www\.)?bilibili\.com/video/)?([aA][vV]\d+|[bB][vV][a-zA-Z0-9]+)[\s\S]*""".toRegex()
+val bili23tvRegex = """[\s\S]*((?:https?://)?(?:www\.)?b23\.tv/[a-zA-Z0-9]+)[\s\S]*""".toRegex()
+val biliUserRegex = """[\s\S]*(?:https?://)?(?:space\.bilibili\.com|bilibili\.com/space)/(\d+)[\s\S]*""".toRegex()
 
 fun MemberPermission.getName(): String = when (this) {
     MemberPermission.MEMBER -> "群员"
@@ -63,7 +64,7 @@ suspend fun <T: Contact,R> T.runCatching(block: suspend T.() -> R): Result<R> {
 /**
  * @author LaoLittle鸽鸽♡
  */
-internal suspend fun MessageEvent.getOrWaitImage(): Image? =
+suspend fun MessageEvent.getOrWaitImage(): Image? =
     (message.takeIf { m -> m.contains(Image) } ?: runCatching {
         subject.sendMessage("请在30秒内发送图片...")
         nextMessage(30_000) { event -> event.message.contains(Image) }
@@ -77,7 +78,7 @@ internal suspend fun MessageEvent.getOrWaitImage(): Image? =
         }
     }).firstIsInstanceOrNull<Image>()
 
-internal suspend fun MessageEvent.getOrWait(): MessageChain? =
+suspend fun MessageEvent.getOrWait(): MessageChain? =
     runCatching {
         this@getOrWait.nextMessage(30_000)
     }.getOrElse {

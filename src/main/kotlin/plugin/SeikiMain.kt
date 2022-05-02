@@ -24,10 +24,7 @@ import org.seiki.SweetBoy.matchRegexOrFail
 import org.seiki.SweetBoy.transToTime
 import org.seiki.plugin.command.audio.Audio
 import org.seiki.plugin.command.audio.Say
-import org.seiki.plugin.command.card.BiliApp
-import org.seiki.plugin.command.card.BiliLight
-import org.seiki.plugin.command.card.BuildForward
-import org.seiki.plugin.command.card.bili
+import org.seiki.plugin.command.card.*
 import org.seiki.plugin.command.image.*
 import org.seiki.plugin.command.image.Moyu.moyu
 import org.seiki.plugin.command.plain.*
@@ -103,7 +100,7 @@ object SeikiMain : KotlinPlugin(
                                 json.meta.detail_1.qqdocurl.substringBefore('?')
                             ).request.url.toString()
                             val bv = url.matchRegexOrFail(biliUrlRegex)[1]
-                            subject.bili(bv).sendTo(subject)
+                            subject.biliVideo(bv).sendTo(subject)
                         }
                     }.onFailure { logger.info { "不是B站小程序" } }
                     runCatching {
@@ -111,7 +108,7 @@ object SeikiMain : KotlinPlugin(
                         if (json.meta.news.appid == 1105517988) {
                             val url = SweetBoy.get(json.meta.news.jumpUrl).request.url.toString()
                             val bv = url.matchRegexOrFail(biliUrlRegex)[1]
-                            subject.sendMessage(subject.bili(bv))
+                            subject.sendMessage(subject.biliVideo(bv))
                         }
                     }.onFailure { logger.info { "不是B站类XML的JSON卡片" } }
                 }
@@ -121,7 +118,7 @@ object SeikiMain : KotlinPlugin(
             if (this.timestamp.transToTime("HH:mm:ss") == "11:45:13") {
                 bot.groups.forEach {
                     it.sendMessage(buildMessageChain {
-                        +PlainText("Seiki报时!\n现在是11:45:14")
+                        +PlainText("${"Seiki".consolas}报时!\n现在是11:45:14")
                         +it.moyu()
                     })
                 }
@@ -129,12 +126,15 @@ object SeikiMain : KotlinPlugin(
         }
         eventChannel.subscribeMessages {
             biliUrlRegex findingReply {
-                val (id) = it.destructured
-                subject.bili(id)
+                subject.biliVideo(it.groupValues[1])
             }
             bili23tvRegex findingReply {
-                val (url) = it.destructured
-                subject.bili(SweetBoy.get(url).request.url.toString().matchRegexOrFail(biliUrlRegex)[1])
+                subject.biliVideo(
+                    SweetBoy.get(it.groupValues[1]).request.url.toString().matchRegexOrFail(biliUrlRegex)[1]
+                )
+            }
+            biliUserRegex findingReply {
+                subject.biliUser(it.groupValues[1].toLong())
             }
             """#5k<([\s\S]*)><([\s\S]*)>""".toRegex() finding {
                 val (top, bottom) = it.destructured
@@ -159,8 +159,18 @@ object SeikiMain : KotlinPlugin(
             """#error""".toRegex() finding {
                 subject.runCatching { throw Error("www") }
             }
-            """#send ([\s\S]+)""".toRegex() findingReply {
+            """#发图 ([\s\S]+)""".toRegex() findingReply {
                 subject.runCatching { Image(it.groupValues[1]) }
+            }
+            """#get ([\s\S]+)""".toRegex() findingReply {
+                subject.runCatching {
+                    SweetBoy.get(it.groupValues[1]).use { r -> r.body!!.string() }
+                }.getOrNull()
+            }
+            """#post ([\s\S]+)""".toRegex() findingReply {
+                subject.runCatching {
+                    SweetBoy.post(it.groupValues[1]).use { r -> r.body!!.string() }
+                }.getOrNull()
             }
         }
         eventChannel.subscribeAlways<BotOnlineEvent> {

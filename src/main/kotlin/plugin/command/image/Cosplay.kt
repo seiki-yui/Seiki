@@ -9,7 +9,7 @@ import net.mamoe.mirai.message.data.sendTo
 import net.mamoe.mirai.utils.info
 import net.mamoe.mirai.utils.warning
 import org.seiki.SweetBoy
-import org.seiki.SweetBoy.transToNumString
+import org.seiki.SweetBoy.transToNum
 import org.seiki.plugin.SeikiMain
 import org.seiki.plugin.uploadAsImage
 
@@ -34,8 +34,8 @@ object Cosplay : SimpleCommand(
                         val image = subject.uploadAsImage(s)
                         add(bot, image)
                         SeikiMain.logger.info {
-                            "${index + 1} / ${data.size} = ${(image.size / 1024.0).transToNumString(2)}kb : ${
-                                (time - System.currentTimeMillis() / 1000.0).transToNumString(2)
+                            "${index + 1} / ${data.size} = ${(image.size / 1024.0).transToNum(2)}kb : ${
+                                (time - System.currentTimeMillis() / 1000.0).transToNum(2)
                             }s SUCCESS -> $s"
                         }
                         time = System.currentTimeMillis()
@@ -44,7 +44,7 @@ object Cosplay : SimpleCommand(
                     }
                 }
             }.sendTo(subject)
-            sendMessage("总用时: ${(start - System.currentTimeMillis() / 1000.0).transToNumString(2)}")
+            sendMessage("总用时: ${(start - System.currentTimeMillis() / 1000.0).transToNum(2)}")
         }
     }
 

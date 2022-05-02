@@ -92,23 +92,26 @@ object SeikiMain : KotlinPlugin(
         eventChannel.subscribeAlways<MessageEvent> {
             message.forEach {
                 if (it is LightApp) {
+//                    TODO("类XML的卡片已知无法解析")
+//                    Warning! com.google.gson.JsonSyntaxException: java.lang.NumberFormatException: Expected an int but was 3504673063 at line 1 column 502 path $.meta.news.uin
+//                    Caused by: java.lang.NumberFormatException: Expected an int but was 3504673063 at line 1 column 502 path $.meta.news.uin
                     val gson = Gson()
-                    runCatching {
+                    /*subject.*/runCatching {
                         val json = gson.fromJson(it.content, BiliLight::class.java)
                         if (json.meta.detail_1.appid == "1109937557") {
                             val url = SweetBoy.get(
                                 json.meta.detail_1.qqdocurl.substringBefore('?')
                             ).request.url.toString()
                             val bv = url.matchRegexOrFail(biliUrlRegex)[1]
-                            subject.biliVideo(bv).sendTo(subject)
+                            subject.biliVideo(bv)?.sendTo(subject)
                         }
                     }.onFailure { logger.info { "不是B站小程序" } }
-                    runCatching {
+                    /*subject.*/runCatching {
                         val json = gson.fromJson(it.content, BiliApp::class.java)
-                        if (json.meta.news.appid == 1105517988) {
+                        if (json.config.token == "f4f95865a73d3016a06d388ced2f388b") {
                             val url = SweetBoy.get(json.meta.news.jumpUrl).request.url.toString()
                             val bv = url.matchRegexOrFail(biliUrlRegex)[1]
-                            subject.sendMessage(subject.biliVideo(bv))
+                            subject.biliVideo(bv)?.sendTo(subject)
                         }
                     }.onFailure { logger.info { "不是B站类XML的JSON卡片" } }
                 }
@@ -150,7 +153,9 @@ object SeikiMain : KotlinPlugin(
             }
             """#consolas ([\s\S]+)""".toRegex() findingReply { it.groupValues[1].consolas }
 
-            """#throwable""".toRegex() finding {
+            """#?(help|帮助|菜单)""".toRegex() findingReply { "http://139.224.249.110/wiki/seiki-bot/index.html#%E4%BD%BF%E7%94%A8" }
+
+            """#throw""".toRegex() finding {
                 subject.runCatching { throw Throwable("www") }
             }
             """#exception""".toRegex() finding {

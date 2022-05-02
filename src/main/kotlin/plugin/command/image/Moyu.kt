@@ -8,6 +8,7 @@ import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.sendTo
 import org.seiki.SweetBoy
 import org.seiki.plugin.SeikiMain
+import org.seiki.plugin.runCatching
 import org.seiki.plugin.uploadAsImage
 
 object Moyu : SimpleCommand(
@@ -16,7 +17,9 @@ object Moyu : SimpleCommand(
 ) {
     @Handler
     suspend fun UserCommandSender.handle() {
-        subject.moyu().sendTo(subject)
+        subject.runCatching {
+            subject.moyu().sendTo(subject)
+        }
     }
 
     suspend fun Contact.moyu(): Image {

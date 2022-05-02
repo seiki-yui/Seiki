@@ -5,6 +5,7 @@ import net.mamoe.mirai.console.command.SimpleCommand
 import net.mamoe.mirai.console.command.UserCommandSender
 import org.seiki.SweetBoy
 import org.seiki.plugin.SeikiMain
+import org.seiki.plugin.runCatching
 
 object Form : SimpleCommand(
     SeikiMain, "form",
@@ -12,9 +13,11 @@ object Form : SimpleCommand(
 ) {
     @Handler
     suspend fun UserCommandSender.handle(name: String) {
-        val rel = SweetBoy.get("http://ovooa.com/API/name/?msg=$name").body!!.string()
-        val json = Gson().fromJson(rel, Form::class.java)
-        sendMessage(json.text)
+        subject.runCatching {
+            val rel = SweetBoy.get("http://ovooa.com/API/name/?msg=$name").body!!.string()
+            val json = Gson().fromJson(rel, Form::class.java)
+            sendMessage(json.text)
+        }
     }
 
     data class Form(

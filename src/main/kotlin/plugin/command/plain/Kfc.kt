@@ -4,6 +4,7 @@ import net.mamoe.mirai.console.command.SimpleCommand
 import net.mamoe.mirai.console.command.UserCommandSender
 import org.seiki.SweetBoy
 import org.seiki.plugin.SeikiMain
+import org.seiki.plugin.runCatching
 
 object Kfc : SimpleCommand(
     SeikiMain, "kfc",
@@ -11,6 +12,8 @@ object Kfc : SimpleCommand(
 ) {
     @Handler
     suspend fun UserCommandSender.handle() {
-        sendMessage(SweetBoy.get("http://139.224.249.110:8008/api/kfc/").body!!.string())
+        subject.runCatching {
+            sendMessage(SweetBoy.get("http://139.224.249.110:8008/api/kfc/").body!!.string())
+        }
     }
 }

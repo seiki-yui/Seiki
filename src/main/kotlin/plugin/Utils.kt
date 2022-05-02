@@ -26,7 +26,8 @@ class TimeTickEvent(
 
 val ownerList = arrayListOf(2630557998L, 1812691029L)
 
-val biliUrlRegex = """[\s\S]*(?:(?:https?://)?(?:www\.)?bilibili\.com/video/)?([aA][vV]\d+|[bB][vV][a-zA-Z0-9]+)[\s\S]*""".toRegex()
+val biliUrlRegex =
+    """[\s\S]*(?:(?:https?://)?(?:www\.)?bilibili\.com/video/)?([aA][vV]\d+|[bB][vV][a-zA-Z0-9]+)[\s\S]*""".toRegex()
 val bili23tvRegex = """[\s\S]*((?:https?://)?(?:www\.)?b23\.tv/[a-zA-Z0-9]+)[\s\S]*""".toRegex()
 val biliUserRegex = """[\s\S]*(?:https?://)?(?:space\.bilibili\.com|bilibili\.com/space)/(\d+)[\s\S]*""".toRegex()
 
@@ -48,12 +49,12 @@ suspend fun Contact.uploadAsAudio(url: String) =
 suspend fun Contact.uploadAsAudio(file: File) =
     file.toExternalResource().use { (this@uploadAsAudio as AudioSupported).uploadAudio(it) }
 
-suspend fun <T: Contact,R> T.runCatching(block: suspend T.() -> R): Result<R> {
+suspend fun <T : Contact, R> T.runCatching(block: suspend T.() -> R): Result<R> {
     return try {
         Result.success(block())
     } catch (e: Throwable) {
         buildMessageChain {
-            +PlainText("Warning! ${e.javaClass.name}: ${e.message}\n\r")
+            +PlainText("Warning! ${e.javaClass.name}: ${e.message}\n")
             if (e.cause != null) +PlainText("Caused by: ${e.cause!!.javaClass.name}: ${e.cause!!.message}")
             +Image("{D3A4F304-847D-BB7B-1534-8ABFDC7575B4}.png")
         }.sendTo(this)

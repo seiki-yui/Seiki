@@ -4,6 +4,7 @@ import net.mamoe.mirai.console.command.SimpleCommand
 import net.mamoe.mirai.console.command.UserCommandSender
 import org.seiki.plugin.SeikiMain
 import org.seiki.plugin.YinglishUtil.yinglish
+import org.seiki.plugin.runCatching
 
 object Yinglish : SimpleCommand(
     SeikiMain, "yinglish",
@@ -11,6 +12,8 @@ object Yinglish : SimpleCommand(
 ) {
     @Handler
     suspend fun UserCommandSender.handle(text: String) {
-        subject.sendMessage(text.yinglish)
+        subject.runCatching {
+            subject.sendMessage(text.yinglish)
+        }
     }
 }

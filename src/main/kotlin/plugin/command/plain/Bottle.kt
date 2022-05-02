@@ -5,6 +5,7 @@ import net.mamoe.mirai.console.command.CompositeCommand
 import net.mamoe.mirai.console.command.UserCommandSender
 import org.seiki.SweetBoy
 import org.seiki.plugin.SeikiMain
+import org.seiki.plugin.runCatching
 
 object Bottle : CompositeCommand(
     SeikiMain, "bottle",
@@ -13,8 +14,10 @@ object Bottle : CompositeCommand(
     @SubCommand
     @Description("捡漂流瓶")
     suspend fun UserCommandSender.get() {
-        val json = Gson().fromJson(SweetBoy.get("http://ovooa.com/API/Piao/").body!!.string(), Bottle::class.java)
-        sendMessage("${json.data[0].title}\n${json.data[0].text}\n${json.data[0].time}")
+        subject.runCatching {
+            val json = Gson().fromJson(SweetBoy.get("http://ovooa.com/API/Piao/").body!!.string(), Bottle::class.java)
+            sendMessage("${json.data[0].title}\n${json.data[0].text}\n${json.data[0].time}")
+        }
     }
 
     @SubCommand

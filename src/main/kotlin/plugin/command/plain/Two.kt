@@ -4,6 +4,7 @@ import net.mamoe.mirai.console.command.SimpleCommand
 import net.mamoe.mirai.console.command.UserCommandSender
 import org.seiki.SweetBoy
 import org.seiki.plugin.SeikiMain
+import org.seiki.plugin.runCatching
 
 object Two : SimpleCommand(
     SeikiMain, "2cy",
@@ -11,6 +12,8 @@ object Two : SimpleCommand(
 ) {
     @Handler
     suspend fun UserCommandSender.handle(name: String) {
-        sendMessage(SweetBoy.get("http://ovooa.com/API/Ser/?type=text&name=$name").body!!.string())
+        subject.runCatching {
+            sendMessage(SweetBoy.get("http://ovooa.com/API/Ser/?type=text&name=$name").body!!.string())
+        }
     }
 }

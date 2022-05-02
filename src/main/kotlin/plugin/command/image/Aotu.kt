@@ -18,7 +18,7 @@ object Aotu : SimpleCommand(
             SeikiMain.logger.info { "Aotu - 开始缓存" }
             repeat(number) { now ->
                 kotlin.runCatching {
-                    subject.uploadAsImage("https://iw233.cn/API/MirlKoi.php").sendTo(subject)
+                    subject.uploadAsImage("https://iw233.cn/api.php?sort=random").sendTo(subject)
                 }.onSuccess {
                     SeikiMain.logger.info { "Aotu - ${now + 1} / $number SUCCESS" }
                 }.onFailure {

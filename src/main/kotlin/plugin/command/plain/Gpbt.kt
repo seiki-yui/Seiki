@@ -5,6 +5,7 @@ import net.mamoe.mirai.console.command.UserCommandSender
 import net.mamoe.mirai.message.data.PlainText
 import org.seiki.SweetBoy
 import org.seiki.plugin.SeikiMain
+import org.seiki.plugin.runCatching
 
 object Gpbt : SimpleCommand(
     SeikiMain, "gpbt",
@@ -12,6 +13,8 @@ object Gpbt : SimpleCommand(
 ) {
     @Handler
     suspend fun UserCommandSender.handle(text: PlainText, long: Int = 300) {
-        sendMessage(SweetBoy.get("http://ovooa.com/API/dog/?type=text&msg=$text&num=$long").body!!.string())
+        subject.runCatching {
+            sendMessage(SweetBoy.get("http://ovooa.com/API/dog/?type=text&msg=$text&num=$long").body!!.string())
+        }
     }
 }

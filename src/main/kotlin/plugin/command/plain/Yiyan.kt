@@ -4,6 +4,7 @@ import net.mamoe.mirai.console.command.SimpleCommand
 import net.mamoe.mirai.console.command.UserCommandSender
 import org.seiki.SweetBoy
 import org.seiki.plugin.SeikiMain
+import org.seiki.plugin.runCatching
 
 object Yiyan : SimpleCommand(
     SeikiMain, "yiyan", "1y", "一言",
@@ -11,6 +12,8 @@ object Yiyan : SimpleCommand(
 ) {
     @Handler
     suspend fun UserCommandSender.handle() {
-        sendMessage(SweetBoy.get("http://ovooa.com/API/dmyiyan/").body!!.string())
+        subject.runCatching {
+            sendMessage(SweetBoy.get("http://ovooa.com/API/dmyiyan/").body!!.string())
+        }
     }
 }

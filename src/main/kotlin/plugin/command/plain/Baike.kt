@@ -8,6 +8,7 @@ import net.mamoe.mirai.message.data.buildMessageChain
 import net.mamoe.mirai.message.data.sendTo
 import org.seiki.SweetBoy
 import org.seiki.plugin.SeikiMain
+import org.seiki.plugin.runCatching
 
 object Baike : SimpleCommand(
     SeikiMain, "baike", "baidu",
@@ -15,12 +16,14 @@ object Baike : SimpleCommand(
 ) {
     @Handler
     suspend fun UserCommandSender.handle(msg: String) {
-        val rel = SweetBoy.get("http://ovooa.com/API/bdbk/?Msg=$msg").body!!.string()
-        val json = Gson().fromJson(rel, Baike::class.java)
-        (if (json.code == 1) buildMessageChain {
-            +PlainText(json.data.Msg + "\n")
-            +PlainText(json.data.info + "\n")
-        } else PlainText(json.text)).sendTo(subject)
+        subject.runCatching {
+            val rel = SweetBoy.get("http://ovooa.com/API/bdbk/?Msg=$msg").body!!.string()
+            val json = Gson().fromJson(rel, Baike::class.java)
+            (if (json.code == 1) buildMessageChain {
+                +PlainText(json.data.Msg + "\n")
+                +PlainText(json.data.info + "\n")
+            } else PlainText(json.text)).sendTo(subject)
+        }
     }
 
     data class Baike(

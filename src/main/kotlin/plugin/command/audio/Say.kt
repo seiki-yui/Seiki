@@ -5,6 +5,7 @@ import net.mamoe.mirai.console.command.UserCommandSender
 import net.mamoe.mirai.message.data.sendTo
 import org.seiki.SweetBoy
 import org.seiki.plugin.SeikiMain
+import org.seiki.plugin.runCatching
 import org.seiki.plugin.uploadAsAudio
 
 object Say : SimpleCommand(
@@ -13,7 +14,9 @@ object Say : SimpleCommand(
 ) {
     @Handler
     suspend fun UserCommandSender.handle(text: String) {
-        val str = SweetBoy.get("http://ovooa.com/API/yuyin/api.php?msg=$text&type=text").body!!.string()
-        subject.uploadAsAudio(str).sendTo(subject)
+        subject.runCatching {
+            val str = SweetBoy.get("http://ovooa.com/API/yuyin/api.php?msg=$text&type=text").body!!.string()
+            subject.uploadAsAudio(str).sendTo(subject)
+        }
     }
 }

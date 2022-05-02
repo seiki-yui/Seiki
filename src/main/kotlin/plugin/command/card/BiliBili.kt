@@ -10,73 +10,75 @@ import org.seiki.SweetBoy
 import org.seiki.SweetBoy.matchRegexOrFail
 import org.seiki.SweetBoy.transToNum
 import org.seiki.SweetBoy.transToTime
+import org.seiki.plugin.runCatching
 import org.seiki.plugin.uploadAsImage
 import java.awt.Dimension
 
-suspend fun Contact.biliVideo(id: String): MessageChain {
-    val isBv = if ("""[bB][vV][a-zA-Z0-9]+""".toRegex().matches(id)) true
-    else if ("""[aA][vV]\d+""".toRegex().matches(id)) false
-    else throw NoSuchElementException("AV/BV号格式错误")
-    val id2 = if (isBv)
-        id.matchRegexOrFail("""[bB][vV]([a-zA-Z0-9]+)""".toRegex())[1]
-    else
-        id.matchRegexOrFail("""[aA][vV](\d+)""".toRegex())[1]
-    val rel1 =
-        SweetBoy.get("http://api.bilibili.com/x/web-interface/view?${if (isBv) "bv" else "a"}id=$id2").use {
-            it.body!!.string()
-        }
-    val rel2 =
-        SweetBoy.get("http://api.bilibili.com/x/web-interface/search/all/v2?keyword=${if (isBv) "BV" else "av"}$id2")
-            .use {
+suspend fun Contact.biliVideo(id: String): MessageChain? =
+    this.runCatching {
+        val isBv = if ("""[bB][vV][a-zA-Z0-9]+""".toRegex().matches(id)) true
+        else if ("""[aA][vV]\d+""".toRegex().matches(id)) false
+        else throw NoSuchElementException("AV/BV号格式错误")
+        val id2 = if (isBv)
+            id.matchRegexOrFail("""[bB][vV]([a-zA-Z0-9]+)""".toRegex())[1]
+        else
+            id.matchRegexOrFail("""[aA][vV](\d+)""".toRegex())[1]
+        val rel1 =
+            SweetBoy.get("http://api.bilibili.com/x/web-interface/view?${if (isBv) "bv" else "a"}id=$id2").use {
                 it.body!!.string()
             }
-    val json1 = Gson().fromJson(rel1, BiliVideoApi::class.java)
-    val json2 = Gson().fromJson(rel2, BiliSearchApi::class.java)
-    val data1 = json1.data
-    val data2 = json2.data.result.last().data.first()
-    return (
-            if (json1.code == 0) {
-                buildMessageChain {
-                    +this@biliVideo.uploadAsImage(json1.data.pic)
-                    +PlainText(json1.data.title + "\n")
-                    +PlainText("https://www.bilibili.com/video/${json1.data.bvid}/\n")
-                    +PlainText("${data1.bvid} - av${data1.aid}\n")
-                    +PlainText("${data2.typename}-${if (data1.copyright == 1) "自制" else "转载"}(${data2.tag})\n")
-                    +PlainText("📅${(data2.pubdate * 1000L).transToTime()} 🕑${data2.duration}\n")
-                    +PlainText("▶${data1.stat.view.transToNum(1)} ")
-                    +PlainText("🈂${data1.stat.danmaku.transToNum(1)}\n")
-                    +PlainText("👍${data1.stat.like.transToNum(1)} ")
-                    +PlainText("⭐${data1.stat.favorite.transToNum(1)} ")
-                    +PlainText("💰${data1.stat.coin.transToNum(1)} ")
-                    +PlainText("↗${data1.stat.share.transToNum(1)}\n")
-                    +PlainText("💬${data1.stat.reply.transToNum(1)} ")
-                    +PlainText("🆙${data1.owner.name} (${json1.data.owner.mid})\n")
-                    +PlainText(json1.data.desc)
+        val rel2 =
+            SweetBoy.get("http://api.bilibili.com/x/web-interface/search/all/v2?keyword=${if (isBv) "BV" else "av"}$id2")
+                .use {
+                    it.body!!.string()
                 }
-            } else messageChainOf(PlainText(json1.message)))
-}
+        val gson = Gson()
+        val json1 = gson.fromJson(rel1, BiliVideoApi::class.java)
+        val json2 = gson.fromJson(rel2, BiliSearchApi::class.java)
+        val data1 = json1.data
+        val data2 = json2.data.result.last().data.first()
+        return@runCatching (if (json1.code == 0) buildMessageChain {
+            +this@biliVideo.uploadAsImage(json1.data.pic)
+            +PlainText(json1.data.title + "\n")
+            +PlainText("https://www.bilibili.com/video/${json1.data.bvid}/\n")
+            +PlainText("${data1.bvid} - av${data1.aid}\n")
+            +PlainText("${data2.typename}-${if (data1.copyright == 1) "自制" else "转载"}(${data2.tag})\n")
+            +PlainText("📅${(data2.pubdate * 1000L).transToTime()} 🕑${data2.duration}\n")
+            +PlainText("▶${data1.stat.view.transToNum(1)} ")
+            +PlainText("🈂${data1.stat.danmaku.transToNum(1)}\n")
+            +PlainText("👍${data1.stat.like.transToNum(1)} ")
+            +PlainText("⭐${data1.stat.favorite.transToNum(1)} ")
+            +PlainText("💰${data1.stat.coin.transToNum(1)} ")
+            +PlainText("↗${data1.stat.share.transToNum(1)}\n")
+            +PlainText("💬${data1.stat.reply.transToNum(1)} ")
+            +PlainText("🆙${data1.owner.name} (${json1.data.owner.mid})\n")
+            +PlainText(json1.data.desc)
+        } else messageChainOf(PlainText(json1.message)))
+    }.getOrNull()
 
-suspend fun Contact.biliUser(id: Long): MessageChain {
-    val gson = Gson()
-    val rel1 = SweetBoy.get("https://api.bilibili.com/x/space/acc/info?mid=$id").use { it.body!!.string() }
-    val rel2 = SweetBoy.get("https://api.bilibili.com/x/relation/stat?vmid=$id").use { it.body!!.string() }
-    val rel3 = SweetBoy.get("https://api.bilibili.com/x/space/arc/search?mid=$id").use { it.body!!.string() }
-    val json1 = gson.fromJson(rel1, BiliUserApi::class.java)
-    val json2 = gson.fromJson(rel2, BiliUserStatApi::class.java)
-    val json3 = gson.fromJson(rel3, BiliUserSearchApi::class.java)
-    val data1 = json1.data
-    val data2 = json2.data
-    val data3 = json3.data
-    return (
-            if (json1.code == 0 && json2.code == 0) buildMessageChain {
-                +this@biliUser.uploadAsImage(data1.face)
-                +PlainText("${data1.name} ${data1.sex} LV${data1.level} 性别:${data1.sex}\n")
-                +PlainText("${data1.sign}\n")
-                +PlainText("关注:${data2.following.transToNum()} 粉丝:${data2.follower.transToNum()} ")
-                +PlainText("总视频数:${data3.list.vlist.size}")
-            } else messageChainOf(PlainText(json1.message))
-            )
-}
+suspend fun Contact.biliUser(id: Long): MessageChain? =
+    this.runCatching {
+        val gson = Gson()
+        val rel1 = SweetBoy.get("https://api.bilibili.com/x/space/acc/info?mid=$id").use { it.body!!.string() }
+        val rel2 = SweetBoy.get("https://api.bilibili.com/x/relation/stat?vmid=$id").use { it.body!!.string() }
+        val rel3 = SweetBoy.get("https://api.bilibili.com/x/space/arc/search?mid=$id").use { it.body!!.string() }
+        val json1 = gson.fromJson(rel1, BiliUserApi::class.java)
+        val json2 = gson.fromJson(rel2, BiliUserStatApi::class.java)
+        val json3 = gson.fromJson(rel3, BiliUserSearchApi::class.java)
+        val data1 = json1.data
+        val data2 = json2.data
+        val data3 = json3.data
+        return@runCatching (
+                if (json1.code == 0 && json2.code == 0 && json3.code == 0) buildMessageChain {
+                    +this@biliUser.uploadAsImage(data1.face)
+                    +PlainText("${data1.name} ${data1.sex} LV${data1.level} ")
+                    +PlainText("性别:${data1.sex}\n${data1.sign}\n")
+                    +PlainText("关注:${data2.following.transToNum()} ")
+                    +PlainText("粉丝:${data2.follower.transToNum()} ")
+                    +PlainText("总视频数:${data3.list.vlist.size}")
+                } else messageChainOf(PlainText("1.${json1.message}\n2.${json2.message}\n3.${json3.message}"))
+                )
+    }.getOrNull()
 
 data class BiliLight(
     val app: String,
@@ -517,7 +519,6 @@ data class EpisodicButton(
 data class List1(
     val vlist: List<Vlist>
 )
-
 
 data class Page2(
     val count: Int,

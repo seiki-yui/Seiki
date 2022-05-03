@@ -283,7 +283,7 @@ data class News(
     val source_url: String,
     val tag: String,
     val title: String,
-    val uin: Int
+    val uin: Long
 )
 
 data class BiliSearchApi(

@@ -18,7 +18,6 @@ import net.mamoe.mirai.event.globalEventChannel
 import net.mamoe.mirai.event.subscribeMessages
 import net.mamoe.mirai.message.data.*
 import net.mamoe.mirai.utils.info
-import org.jetbrains.skia.Paint
 import org.seiki.SweetBoy
 import org.seiki.SweetBoy.matchRegexOrFail
 import org.seiki.SweetBoy.transToTime
@@ -36,11 +35,11 @@ object SeikiMain : KotlinPlugin(
         name = "Seiki Main"
     ) {
         author("xiao-zheng233")
-//        dependsOn("org.laolittle.plugin.SkikoMirai", ">=1.0.3", true)
     }
 ) {
 
     val audioFolder = dataFolder.resolve("audio")
+    val tempFolder = dataFolder.resolve("temp")
 
     private const val useTimeTickEvent = true
 
@@ -48,8 +47,10 @@ object SeikiMain : KotlinPlugin(
 
     @OptIn(ExperimentalCommandDescriptors::class, ConsoleExperimentalApi::class)
     override fun onEnable() {
-        logger.info { Paint::class.java.name }
         logger.info { "Seiki Main loaded" }
+        if (!System.getProperties().getProperty("os.name").startsWith("Windows")) {
+            System.setProperty("java.awt.headless", "true")
+        }
         val commandList: List<Command> = listOf(
             Ping,
             Gpbt,
@@ -74,6 +75,7 @@ object SeikiMain : KotlinPlugin(
             Qian,
             Draw,
             Osu,
+            PatPat,
             PronHub,
             FiveK,
             BlackWhite,
@@ -261,6 +263,7 @@ object SeikiMain : KotlinPlugin(
 
     override fun onDisable() {
         jobTimeTick.cancel()
+        tempFolder.walk().filter { it.path.toString().endsWith("_pat.gif") }.forEach { it.delete() }
         super.onDisable()
     }
 }

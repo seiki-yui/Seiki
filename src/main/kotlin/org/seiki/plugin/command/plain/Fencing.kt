@@ -7,7 +7,7 @@ import org.seiki.plugin.SeikiMain
 import org.seiki.plugin.runCatching
 
 object Fencing : SimpleCommand(
-    SeikiMain, "fencing", "击剑","\uD83E\uDD3A",
+    SeikiMain, "fencing", "击剑", "\uD83E\uDD3A",
     description = "击剑:at一个人，随机禁言其中一个"
 ) {
     @Handler

@@ -10,6 +10,7 @@ import org.laolittle.plugin.Fonts
 import org.laolittle.plugin.toExternalResource
 import org.seiki.SweetBoy
 import org.seiki.plugin.SeikiMain
+
 import org.seiki.plugin.getOrWaitImage
 import org.seiki.plugin.runCatching
 import kotlin.math.min

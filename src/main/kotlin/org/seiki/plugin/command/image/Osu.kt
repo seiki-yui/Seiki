@@ -15,7 +15,8 @@ object Osu : SimpleCommand(
     SeikiMain, "osu",
     description = "生成OSU风格的图标"
 ) {
-    private val res: ByteArray = SeikiMain::class.java.getResourceAsStream("/osuLogo.png")!!.use { it.readAllBytes() }
+    private val res: ByteArray =
+        SeikiMain::class.java.getResourceAsStream("/data/Osu/osuLogo.png")!!.use { it.readAllBytes() }
 
     /**
      * @author xiao_zheng

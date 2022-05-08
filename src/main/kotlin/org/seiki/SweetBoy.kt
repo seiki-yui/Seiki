@@ -15,7 +15,7 @@ import java.text.SimpleDateFormat
 import java.util.concurrent.TimeUnit
 
 object SweetBoy {
-    private val okHttpClient: OkHttpClient = OkHttpClient.Builder()
+    val okHttpClient: OkHttpClient = OkHttpClient.Builder()
         .readTimeout(5, TimeUnit.SECONDS)
         .writeTimeout(5, TimeUnit.SECONDS)
         .connectTimeout(5, TimeUnit.SECONDS)
@@ -81,6 +81,7 @@ object SweetBoy {
      * @param whetherFolder 是否检索子文件夹
      * @return 文件列表
      */
+    @Deprecated("这个不好用 不如自己现成造", level = DeprecationLevel.WARNING)
     fun findFileByExt(path: String, ext: List<String>, whetherFolder: Boolean? = true): MutableList<String> {
         val fileNames: MutableList<String> = mutableListOf()
         val fileTree: FileTreeWalk = File(path).walk()

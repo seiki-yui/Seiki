@@ -10,7 +10,7 @@ import org.seiki.plugin.SeikiMain
 import org.seiki.plugin.runCatching
 
 object Dazs : SimpleCommand(
-    SeikiMain, "dazs",
+    SeikiMain, "dazs","答案之书",
     description = "答案之书"
 ) {
     @Handler

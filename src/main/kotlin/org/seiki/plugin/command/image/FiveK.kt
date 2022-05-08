@@ -12,7 +12,7 @@ import org.seiki.plugin.SeikiMain
 import org.seiki.plugin.runCatching
 
 object FiveK : SimpleCommand(
-    SeikiMain, "5k",
+    SeikiMain, "5k","choyen","5000choyen","五千",
     description = "生成五千兆图片"
 ) {
     /**

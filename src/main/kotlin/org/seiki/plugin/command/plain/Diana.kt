@@ -7,7 +7,7 @@ import org.seiki.plugin.SeikiMain
 import org.seiki.plugin.runCatching
 
 object Diana : SimpleCommand(
-    SeikiMain, "diana",
+    SeikiMain, "diana","发病",
     description = "发病"
 ) {
     @Handler

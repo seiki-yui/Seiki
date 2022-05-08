@@ -7,7 +7,7 @@ import org.seiki.plugin.SeikiMain
 import org.seiki.plugin.runCatching
 
 object Kfc : SimpleCommand(
-    SeikiMain, "kfc",
+    SeikiMain, "kfc","肯德基",
     description = "肯德基疯狂星期四"
 ) {
     @Handler

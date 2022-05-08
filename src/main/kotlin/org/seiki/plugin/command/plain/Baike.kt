@@ -11,7 +11,7 @@ import org.seiki.plugin.SeikiMain
 import org.seiki.plugin.runCatching
 
 object Baike : SimpleCommand(
-    SeikiMain, "baike", "baidu",
+    SeikiMain, "baike", "百科",
     description = "百度百科"
 ) {
     @Handler

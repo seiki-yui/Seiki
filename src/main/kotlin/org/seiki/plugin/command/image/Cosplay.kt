@@ -14,7 +14,7 @@ import org.seiki.plugin.SeikiMain
 import org.seiki.plugin.uploadAsImage
 
 object Cosplay : SimpleCommand(
-    SeikiMain, "cos",
+    SeikiMain, "cos","cosplay",
     description = "Cosplay图片，打包为聊天记录"
 ) {
     @Handler

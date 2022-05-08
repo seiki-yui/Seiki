@@ -11,7 +11,7 @@ import org.seiki.plugin.SeikiMain
 import org.seiki.plugin.uploadAsImage
 
 object Setu : SimpleCommand(
-    SeikiMain, "setu",
+    SeikiMain, "setu","涩图",
     description = "获取几张涩图~"
 ) {
     @Handler

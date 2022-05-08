@@ -14,7 +14,7 @@ import org.seiki.plugin.getOrWaitImage
 import org.seiki.plugin.runCatching
 
 object BlackWhite : SimpleCommand(
-    SeikiMain, "bw",
+    SeikiMain, "bw","blackwhite","黑白",
     description = "生成黑白图"
 ) {
     @Handler

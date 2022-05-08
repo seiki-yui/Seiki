@@ -18,7 +18,9 @@ repositories {
     mavenCentral()
 }
 
-val legacy: Boolean = true
+val legacy: Boolean = false
+// 使用SkikoMirai 1.0.2 jar解包的dll,和SkikoLibs的icudtl.dat文件 即可兼容windows7
+// 这一切一定都是LaoLittle的错 哼
 
 fun skikoAwt(ver: String) = "org.jetbrains.skiko:skiko-awt-runtime-$ver"
 
@@ -31,10 +33,9 @@ dependencies {
         implementation(skikoAwt("linux-x64:$skikoVer"))
         implementation(skikoAwt("linux-arm64:$skikoVer"))
     } else {
-        val smVer = "1.0.6"
+        val smVer = "1.0.7"
         compileOnly("com.github.LaoLittle:SkikoMirai:$smVer")
         testImplementation("com.github.LaoLittle:SkikoMirai:$smVer")
-        testImplementation("org.jetbrains.skiko:skiko-awt-runtime-windows-x64:0.7.18")
     }
 
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))

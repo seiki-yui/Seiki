@@ -16,8 +16,11 @@ import net.mamoe.mirai.event.broadcast
 import net.mamoe.mirai.event.events.*
 import net.mamoe.mirai.event.globalEventChannel
 import net.mamoe.mirai.event.subscribeMessages
-import net.mamoe.mirai.message.data.*
+import net.mamoe.mirai.message.data.Image
+import net.mamoe.mirai.message.data.LightApp
+import net.mamoe.mirai.message.data.sendTo
 import net.mamoe.mirai.utils.info
+import org.laolittle.plugin.Fonts
 import org.seiki.SweetBoy
 import org.seiki.SweetBoy.matchRegexOrFail
 import org.seiki.SweetBoy.transToTime
@@ -25,7 +28,6 @@ import org.seiki.plugin.command.audio.Audio
 import org.seiki.plugin.command.audio.Say
 import org.seiki.plugin.command.card.*
 import org.seiki.plugin.command.image.*
-import org.seiki.plugin.command.image.Moyu.moyu
 import org.seiki.plugin.command.plain.*
 
 object SeikiMain : KotlinPlugin(
@@ -48,6 +50,7 @@ object SeikiMain : KotlinPlugin(
     @OptIn(ExperimentalCommandDescriptors::class, ConsoleExperimentalApi::class)
     override fun onEnable() {
         logger.info { "Seiki Main loaded" }
+        logger.info { Fonts["Consolas"].toString() }
         if (!System.getProperties().getProperty("os.name").startsWith("Windows")) {
             System.setProperty("java.awt.headless", "true")
         }
@@ -124,10 +127,7 @@ object SeikiMain : KotlinPlugin(
         eventChannel.subscribeAlways<TimeTickEvent> {
             if (this.timestamp.transToTime("HH:mm:ss") == "11:45:13") {
                 bot.groups.forEach {
-                    it.sendMessage(buildMessageChain {
-                        +PlainText("${"Seiki".consolas}报时!\n现在是11:45:14")
-                        +it.moyu()
-                    })
+                    it.sendMessage("${"Seiki".consolas}报时!\n现在是11:45:14")
                 }
             }
         }

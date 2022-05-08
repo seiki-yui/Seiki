@@ -7,7 +7,7 @@ import org.seiki.plugin.SeikiMain
 import org.seiki.plugin.runCatching
 
 object Two : SimpleCommand(
-    SeikiMain, "2cy",
+    SeikiMain, "2cy","二次元",
     description = "二次元少女的你"
 ) {
     @Handler

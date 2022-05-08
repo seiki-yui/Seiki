@@ -12,6 +12,7 @@ import org.seiki.SweetBoy
 import org.seiki.plugin.SeikiMain
 import org.seiki.plugin.getOrWaitImage
 import org.seiki.plugin.runCatching
+import org.jetbrains.skia.Image as SkImage
 
 object BlackWhite : SimpleCommand(
     SeikiMain, "bw","blackwhite","黑白",
@@ -23,7 +24,7 @@ object BlackWhite : SimpleCommand(
             val img = image ?: fromEvent.getOrWaitImage() ?: return@runCatching
 
             val skikoImage =
-                org.jetbrains.skia.Image.makeFromEncoded(SweetBoy.getBytes(img.queryUrl()))
+                SkImage.makeFromEncoded(SweetBoy.getBytes(img.queryUrl()))
             val paint = Paint().apply {
                 isAntiAlias = true
             }

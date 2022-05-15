@@ -135,48 +135,49 @@ object SeikiMain : KotlinPlugin(
             biliUrlRegex findingReply {
                 subject.biliVideo(it.groupValues[1])
             }
-            bili23tvRegex findingReply {
-                subject.biliVideo(
-                    SweetBoy.get(it.groupValues[1]).request.url.toString().matchRegexOrFail(biliUrlRegex)[1]
-                )
+            bili23tvRegex finding {
+                val url = SweetBoy.get(it.groupValues[1]).use { r -> r.request.url }.toString()
+                when {
+                    biliUrlRegex.matches(url) -> subject.biliVideo(it.groupValues[1])
+                    biliUserRegex.matches(url) -> subject.biliUser(it.groupValues[1].toLong())
+                    else -> null
+                }?.sendTo(subject)
             }
             biliUserRegex findingReply {
                 subject.biliUser(it.groupValues[1].toLong())
             }
-            """#5k<([\s\S]*)><([\s\S]*)>""".toRegex() finding {
+            """^#5k<([\s\S]*)><([\s\S]*)>$""".toRegex() finding {
                 val (top, bottom) = it.destructured
                 with(FiveK) {
                     sender.asCommandSender(isTemp = false).handle(top, bottom)
                 }
             }
-            """#osu<([\s\S]+)>""".toRegex() finding {
+            """^#osu<([\s\S]+)>$""".toRegex() finding {
                 val (text) = it.destructured
                 with(Osu) {
                     sender.asCommandSender(isTemp = false).handle(text)
                 }
             }
-            """#consolas ([\s\S]+)""".toRegex() findingReply { it.groupValues[1].consolas }
-
-            """#?(help|帮助|菜单)""".toRegex() findingReply { "http://139.224.249.110/wiki/seiki-bot/index.html#%E4%BD%BF%E7%94%A8" }
-
-            """#throw""".toRegex() finding {
+            """^#consolas ([\s\S]+)$""".toRegex() findingReply { it.groupValues[1].consolas }
+            """^#?(help|帮助|菜单)$""".toRegex() findingReply { "http://seiki.fun/wiki/seiki-bot/#%E4%BD%BF%E7%94%A8" }
+            """^#throw$""".toRegex() finding {
                 subject.runCatching { throw Throwable("www") }
             }
-            """#exception""".toRegex() finding {
+            """^#exception$""".toRegex() finding {
                 subject.runCatching { throw Exception("www") }
             }
-            """#error""".toRegex() finding {
+            """^#error$""".toRegex() finding {
                 subject.runCatching { throw Error("www") }
             }
-            """#发图 ([\s\S]+)""".toRegex() findingReply {
+            """^#发图 ([\s\S]+)$""".toRegex() findingReply {
                 subject.runCatching { Image(it.groupValues[1]) }
             }
-            """#get ([\s\S]+)""".toRegex() findingReply {
+            """^#get ([\s\S]+)$""".toRegex() findingReply {
                 subject.runCatching {
                     SweetBoy.get(it.groupValues[1]).use { r -> r.body!!.string() }
                 }.getOrNull()
             }
-            """#post ([\s\S]+)""".toRegex() findingReply {
+            """^#post ([\s\S]+)$""".toRegex() findingReply {
                 subject.runCatching {
                     SweetBoy.post(it.groupValues[1]).use { r -> r.body!!.string() }
                 }.getOrNull()

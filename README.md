@@ -22,5 +22,3 @@
 
 - [银语翻译](https://github.com/LaoLittle/yinglish-kt)
 - [DrawMeme](https://github.com/LaoLittle/DrawMeme)
-
-自用项目，使用 `SkikoMirai 1.0.2` 版本保证兼容 `Windows7`

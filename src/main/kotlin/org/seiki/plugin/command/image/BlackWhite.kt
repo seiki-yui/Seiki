@@ -15,7 +15,7 @@ import org.seiki.plugin.runCatching
 import org.jetbrains.skia.Image as SkImage
 
 object BlackWhite : SimpleCommand(
-    SeikiMain, "bw","blackwhite","黑白",
+    SeikiMain, "bw", "blackwhite", "黑白",
     description = "生成黑白图"
 ) {
     @Handler

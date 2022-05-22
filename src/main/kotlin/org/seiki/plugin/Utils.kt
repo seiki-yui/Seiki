@@ -34,10 +34,10 @@ class TimeTickEvent(
 
 val ownerList = arrayListOf(2630557998L, 1812691029L)
 
-val biliUrlRegex =
-    """[\s\S]*(?:(?:https?://)?(?:www\.)?bilibili\.com/video/)?([aA][vV]\d+|[bB][vV][a-zA-Z0-9]+)[\s\S]*""".toRegex()
-val bili23tvRegex = """[\s\S]*((?:https?://)?(?:www\.)?b23\.tv/[a-zA-Z0-9]+)[\s\S]*""".toRegex()
-val biliUserRegex = """[\s\S]*(?:https?://)?(?:space\.bilibili\.com|bilibili\.com/space)/(\d+)[\s\S]*""".toRegex()
+val biliVideoRegex =
+    """[\s\S]*?(?:(?:https?://)?(?:www\.)?bilibili\.com/video/)?([aA][vV]\d+|[bB][vV][a-zA-Z0-9]+)[\s\S]*?""".toRegex()
+val bili23tvRegex = """[\s\S]*?((?:https?://)?(?:www\.)?b23\.tv/[a-zA-Z0-9]+)[\s\S]*?""".toRegex()
+val biliUserRegex = """[\s\S]*?(?:https?://)?(?:space\.bilibili\.com|bilibili\.com/space)/(\d+)[\s\S]*?""".toRegex()
 
 fun MemberPermission.getName(): String = when (this) {
     MemberPermission.MEMBER -> "群员"

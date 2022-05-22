@@ -22,6 +22,7 @@ import net.mamoe.mirai.message.data.sendTo
 import net.mamoe.mirai.utils.info
 import org.laolittle.plugin.Fonts
 import org.seiki.SweetBoy
+import org.seiki.SweetBoy.matchRegex
 import org.seiki.SweetBoy.matchRegexOrFail
 import org.seiki.SweetBoy.transToTime
 import org.seiki.plugin.command.audio.Audio
@@ -41,7 +42,6 @@ object SeikiMain : KotlinPlugin(
 ) {
 
     val audioFolder = dataFolder.resolve("audio")
-    val tempFolder = dataFolder.resolve("temp")
 
     private const val useTimeTickEvent = true
 
@@ -107,7 +107,7 @@ object SeikiMain : KotlinPlugin(
                             val url = SweetBoy.get(
                                 json.meta.detail_1.qqdocurl.substringBefore('?')
                             ).use { r -> r.request.url.toString() }
-                            val bv = url.matchRegexOrFail(biliUrlRegex)[1]
+                            val bv = url.matchRegexOrFail(biliVideoRegex)[1]
                             subject.biliVideo(bv)?.sendTo(subject)
                         } else logger.info { "BiliLight出了问题" }
                     }.onFailure { logger.info { "不是B站小程序" } }
@@ -115,9 +115,7 @@ object SeikiMain : KotlinPlugin(
                         val json = gson.fromJson(it.content, BiliApp::class.java)
                         if (json.meta.news.appid == 1105517988 || json.meta.news.appid == 100951776) {
                             val url = SweetBoy.get(json.meta.news.jumpUrl).use { r -> r.request.url.toString() }
-                            logger.info { url }
-                            val bv = url.matchRegexOrFail(biliUrlRegex)[1]
-                            logger.info { bv }
+                            val bv = url.matchRegexOrFail(biliVideoRegex)[1]
                             subject.biliVideo(bv)?.sendTo(subject)
                         } else logger.info { "BiliApp AppID非1105517988 或 100951776" }
                     }.onFailure { logger.info { "不是B站类XML的JSON卡片" } }
@@ -132,29 +130,26 @@ object SeikiMain : KotlinPlugin(
             }
         }
         eventChannel.subscribeMessages {
-            biliUrlRegex findingReply {
-                subject.biliVideo(it.groupValues[1])
-            }
+            biliVideoRegex findingReply { subject.biliVideo(it.groupValues[1]) }
+            biliUserRegex findingReply { subject.biliUser(it.groupValues[1].toLong()) }
             bili23tvRegex finding {
                 val url = SweetBoy.get(it.groupValues[1]).use { r -> r.request.url }.toString()
                 when {
-                    biliUrlRegex.matches(url) -> subject.biliVideo(it.groupValues[1])
-                    biliUserRegex.matches(url) -> subject.biliUser(it.groupValues[1].toLong())
+                    biliVideoRegex.matches(url) -> subject.biliVideo(url.matchRegex(biliVideoRegex)!![1])
+                    biliUserRegex.matches(url) -> subject.biliUser(url.matchRegex(biliUserRegex)!![1].toLong())
                     else -> null
                 }?.sendTo(subject)
             }
-            biliUserRegex findingReply {
-                subject.biliUser(it.groupValues[1].toLong())
-            }
+
             """^#5k<([\s\S]*)><([\s\S]*)>$""".toRegex() finding {
                 val (top, bottom) = it.destructured
-                with(FiveK) {
+                FiveK.apply {
                     sender.asCommandSender(isTemp = false).handle(top, bottom)
                 }
             }
             """^#osu<([\s\S]+)>$""".toRegex() finding {
                 val (text) = it.destructured
-                with(Osu) {
+                Osu.apply {
                     sender.asCommandSender(isTemp = false).handle(text)
                 }
             }
@@ -264,7 +259,6 @@ object SeikiMain : KotlinPlugin(
 
     override fun onDisable() {
         jobTimeTick.cancel()
-        tempFolder.walk().filter { it.path.toString().endsWith("_pat.gif") }.forEach { it.delete() }
         super.onDisable()
     }
 }

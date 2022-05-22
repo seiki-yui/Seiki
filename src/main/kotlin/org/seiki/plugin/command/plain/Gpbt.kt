@@ -8,7 +8,7 @@ import org.seiki.plugin.SeikiMain
 import org.seiki.plugin.runCatching
 
 object Gpbt : SimpleCommand(
-    SeikiMain, "gpbt","狗屁不通",
+    SeikiMain, "gpbt", "狗屁不通",
     description = "狗屁不通文章生成器"
 ) {
     @Handler

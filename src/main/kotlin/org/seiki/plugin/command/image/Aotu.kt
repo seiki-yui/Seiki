@@ -9,7 +9,7 @@ import org.seiki.plugin.SeikiMain
 import org.seiki.plugin.uploadAsImage
 
 object Aotu : SimpleCommand(
-    SeikiMain, "aotu","好图",
+    SeikiMain, "aotu", "好图",
     description = "获取几张好康的"
 ) {
     @Handler

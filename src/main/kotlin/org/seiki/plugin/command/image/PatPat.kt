@@ -13,13 +13,17 @@ import org.seiki.plugin.getOrWaitImage
 import org.jetbrains.skia.Image as SkImage
 
 object PatPat : SimpleCommand(
-    SeikiMain, "pat", "patpat","摸",
+    SeikiMain, "pat", "patpat", "摸",
     description = "摸一摸"
 ) {
     @Handler
     suspend fun MemberCommandSenderOnMessage.handle(user: User? = null, delay: Double = .05) {
         subject.runCatching {
-            val img = SkImage.makeFromEncoded(SweetBoy.getStream(user?.avatarUrl ?: fromEvent.getOrWaitImage()?.queryUrl() ?: return).use { it.readBytes() })
-            patpat(img, delay).bytes.toExternalResource("GIF").use { subject.sendImage(it) } }
+            val img = SkImage.makeFromEncoded(
+                SweetBoy.getStream(
+                    user?.avatarUrl ?: fromEvent.getOrWaitImage()?.queryUrl() ?: return
+                ).use { it.readBytes() })
+            patpat(img, delay).bytes.toExternalResource("GIF").use { subject.sendImage(it) }
+        }
     }
 }

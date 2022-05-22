@@ -10,7 +10,7 @@ import org.seiki.plugin.SeikiMain
 import org.seiki.plugin.runCatching
 
 object PronHub : SimpleCommand(
-    SeikiMain, "ph","pronhub",
+    SeikiMain, "ph", "pronhub",
     description = "生成PronHub风格的图标"
 ) {
     @Handler

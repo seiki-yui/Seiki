@@ -12,7 +12,7 @@ import org.seiki.plugin.runCatching
 import org.seiki.plugin.uploadAsImage
 
 object Moyu : SimpleCommand(
-    SeikiMain, "moyu","摸鱼",
+    SeikiMain, "moyu", "摸鱼",
     description = "获取今日摸鱼日历"
 ) {
     @Handler

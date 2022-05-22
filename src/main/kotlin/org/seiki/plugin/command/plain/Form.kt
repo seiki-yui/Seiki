@@ -8,7 +8,7 @@ import org.seiki.plugin.SeikiMain
 import org.seiki.plugin.runCatching
 
 object Form : SimpleCommand(
-    SeikiMain, "form","组成",
+    SeikiMain, "form", "组成",
     description = "查查你的成分构成……"
 ) {
     @Handler

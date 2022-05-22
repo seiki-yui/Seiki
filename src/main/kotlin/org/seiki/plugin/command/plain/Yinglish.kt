@@ -7,7 +7,7 @@ import org.seiki.plugin.YinglishUtil.yinglish
 import org.seiki.plugin.runCatching
 
 object Yinglish : SimpleCommand(
-    SeikiMain, "yinglish","yl","淫语",
+    SeikiMain, "yinglish", "yl", "淫语",
     description = "淫语翻译器"
 ) {
     @Handler

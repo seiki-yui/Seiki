@@ -9,7 +9,7 @@ import org.seiki.plugin.SeikiMain
 import org.seiki.plugin.runCatching
 
 object Nbnhhsh : SimpleCommand(
-    SeikiMain, "nbnhhsh", "hhsh","能不能好好说话",
+    SeikiMain, "nbnhhsh", "hhsh", "能不能好好说话",
     description = "能不能好好说话？"
 ) {
     @Handler

@@ -9,7 +9,7 @@ import org.seiki.plugin.runCatching
 import org.seiki.plugin.uploadAsAudio
 
 object Say : SimpleCommand(
-    SeikiMain, "say","读",
+    SeikiMain, "say", "读",
     description = "以语音读出文本"
 ) {
     @Handler

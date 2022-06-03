@@ -1,7 +1,8 @@
 package org.seiki.plugin
 
+import cn.hutool.cron.CronUtil
+import cn.hutool.cron.task.Task
 import com.google.gson.Gson
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.mamoe.mirai.console.command.Command
@@ -10,7 +11,6 @@ import net.mamoe.mirai.console.command.descriptor.ExperimentalCommandDescriptors
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
-import net.mamoe.mirai.event.broadcast
 import net.mamoe.mirai.event.events.*
 import net.mamoe.mirai.event.globalEventChannel
 import net.mamoe.mirai.event.subscribeMessages
@@ -22,7 +22,6 @@ import org.laolittle.plugin.Fonts
 import org.seiki.SweetBoy
 import org.seiki.SweetBoy.matchRegex
 import org.seiki.SweetBoy.matchRegexOrFail
-import org.seiki.SweetBoy.transToTime
 import org.seiki.plugin.command.audio.Audio
 import org.seiki.plugin.command.audio.Say
 import org.seiki.plugin.command.card.*
@@ -40,10 +39,6 @@ object SeikiMain : KotlinPlugin(
 ) {
 
     val audioFolder = dataFolder.resolve("audio")
-
-    private const val useTimeTickEvent = true
-
-    private lateinit var jobTimeTick: Job
 
     @OptIn(ExperimentalCommandDescriptors::class, ConsoleExperimentalApi::class)
     override fun onEnable() {
@@ -118,13 +113,6 @@ object SeikiMain : KotlinPlugin(
                 }
             }
         }
-        eventChannel.subscribeAlways<TimeTickEvent> {
-            if (this.timestamp.transToTime("HH:mm:ss") == "11:45:13") {
-                bot.groups.forEach {
-                    it.sendMessage("${"Seiki".consolas}报时!\n现在是11:45:14")
-                }
-            }
-        }
         eventChannel.subscribeMessages {
             biliVideoRegex findingReply { subject.biliVideo(it.groupValues[1]) }
             biliUserRegex findingReply { subject.biliUser(it.groupValues[1].toLong()) }
@@ -136,7 +124,6 @@ object SeikiMain : KotlinPlugin(
                     else -> null
                 }?.sendTo(subject)
             }
-            """^#consolas ([\s\S]+)$""".toRegex() findingReply { it.groupValues[1].consolas }
             """^#?(help|帮助|菜单)$""".toRegex() findingReply { "http://seiki.fun/wiki/seiki-bot/#%E4%BD%BF%E7%94%A8" }
             """^#throw$""".toRegex() finding {
                 subject.runCatching { throw Throwable("www") }
@@ -162,12 +149,15 @@ object SeikiMain : KotlinPlugin(
             }
         }
         eventChannel.subscribeAlways<BotOnlineEvent> {
-            jobTimeTick = if (useTimeTickEvent) launch {
-                while (true) {
-                    TimeTickEvent(bot, System.currentTimeMillis()).broadcast()
-                    delay(999L)
+            CronUtil.schedule("14 45 11,23 * * ?", Task {
+                suspend {
+                    bot.groups.forEach {
+                        it.sendMessage("Seiki报时!\n现在是11:45:14")
+                    }
                 }
-            } else launch {}
+            })
+            CronUtil.setMatchSecond(true)
+            CronUtil.start()
         } // bot上线
         eventChannel.subscribeAlways<BotInvitedJoinGroupRequestEvent> {
             if (invitorId in ownerList) launch {
@@ -178,7 +168,7 @@ object SeikiMain : KotlinPlugin(
         eventChannel.subscribeAlways<BotJoinGroupEvent> {
             launch {
                 delay(100L)
-                group.sendMessage("这里是${"Seiki".consolas}.发送\"# help\"来康教程.")
+                group.sendMessage("这里是Seiki.发送\"# help\"来康教程.")
             }
         } // bot进群
         eventChannel.subscribeAlways<NudgeEvent> {
@@ -241,7 +231,7 @@ object SeikiMain : KotlinPlugin(
     }
 
     override fun onDisable() {
-        jobTimeTick.cancel()
+        CronUtil.stop()
         super.onDisable()
     }
 }

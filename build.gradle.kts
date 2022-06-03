@@ -2,7 +2,8 @@ plugins {
     val kotlinVersion = "1.6.20"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.serialization") version kotlinVersion
-    id("net.mamoe.mirai-console") version "2.11.0"
+
+    id("net.mamoe.mirai-console") version "2.11.1"
 }
 
 group = "org.seiki"
@@ -18,19 +19,17 @@ repositories {
     mavenCentral()
 }
 
-val legacy: Boolean = false
-// 使用SkikoMirai 1.0.2 jar解包的dll,和SkikoLibs的icudtl.dat文件 即可兼容windows7
-// 这一切一定都是LaoLittle的错 哼
-
 fun skikoAwt(ver: String) = "org.jetbrains.skiko:skiko-awt-runtime-$ver"
 
 dependencies {
     implementation("com.google.code.gson:gson:2.9.0")
+    implementation("cn.hutool:hutool-cron:5.8.2")
 //    implementation(skikoAwt("linux-arm64:$skikoVer"))
     val smVer = "1.0.8"
     compileOnly("com.github.LaoLittle:SkikoMirai:$smVer")
     testImplementation("com.github.LaoLittle:SkikoMirai:$smVer")
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
+    testImplementation(kotlin("script-runtime"))
 }
 
 tasks {

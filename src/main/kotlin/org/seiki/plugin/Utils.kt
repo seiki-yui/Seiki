@@ -4,10 +4,8 @@ package org.seiki.plugin
 
 import com.huaban.analysis.jieba.JiebaSegmenter
 import com.huaban.analysis.jieba.WordDictionary
-import kotlinx.coroutines.*
-import net.mamoe.mirai.Bot
+import kotlinx.coroutines.TimeoutCancellationException
 import net.mamoe.mirai.contact.*
-import net.mamoe.mirai.event.AbstractEvent
 import net.mamoe.mirai.event.events.MessageEvent
 import net.mamoe.mirai.message.data.*
 import net.mamoe.mirai.message.data.MessageSource.Key.quote
@@ -25,16 +23,11 @@ import org.seiki.plugin.SkikoUtil.makeFromResource
 import java.io.File
 import org.jetbrains.skia.Image as SkImage
 
-class TimeTickEvent(
-    var bot: Bot,
-    var timestamp: Long,
-) : AbstractEvent()
-
 val ownerList = arrayListOf(2630557998L, 1812691029L)
 
 val biliVideoRegex =
-    """[\s\S]*?(?:(?:https?://)?(?:www\.)?bilibili\.com/video/)?([aA][vV]\d+|[bB][vV][a-zA-Z0-9]+)[\s\S]*?""".toRegex()
-val bili23tvRegex = """[\s\S]*?((?:https?://)?(?:www\.)?b23\.tv/[a-zA-Z0-9]+)[\s\S]*?""".toRegex()
+    """[\s\S]*?(?:(?:https?://)?(?:www\.)?bilibili\.com/video/)?([aA][vV]\d+|[bB][vV][a-zA-Z\d]+)[\s\S]*?""".toRegex()
+val bili23tvRegex = """[\s\S]*?((?:https?://)?(?:www\.)?b23\.tv/[a-zA-Z\d]+)[\s\S]*?""".toRegex()
 val biliUserRegex = """[\s\S]*?(?:https?://)?(?:space\.bilibili\.com|bilibili\.com/space)/(\d+)[\s\S]*?""".toRegex()
 
 val MemberPermission.levelName: String get() = when (this) {
@@ -100,6 +93,7 @@ suspend fun MessageEvent.getOrWait(): MessageChain? =
         }
     }
 
+@Deprecated("不适用",level = DeprecationLevel.WARNING)
 val String.consolas: String
     get() {
         val hash: HashMap<String, String> = hashMapOf(

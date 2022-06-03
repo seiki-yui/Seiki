@@ -2,7 +2,7 @@ plugins {
     val kotlinVersion = "1.6.20"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.serialization") version kotlinVersion
-    id("net.mamoe.mirai-console") version "2.10.1"
+    id("net.mamoe.mirai-console") version "2.11.0"
 }
 
 group = "org.seiki"
@@ -26,18 +26,10 @@ fun skikoAwt(ver: String) = "org.jetbrains.skiko:skiko-awt-runtime-$ver"
 
 dependencies {
     implementation("com.google.code.gson:gson:2.9.0")
-
-    if (legacy) {
-        val skikoVer = "0.7.16"
-        implementation(skikoAwt("windows-x64:$skikoVer"))
-        implementation(skikoAwt("linux-x64:$skikoVer"))
-        implementation(skikoAwt("linux-arm64:$skikoVer"))
-    } else {
-        val smVer = "1.0.7"
-        compileOnly("com.github.LaoLittle:SkikoMirai:$smVer")
-        testImplementation("com.github.LaoLittle:SkikoMirai:$smVer")
-    }
-
+//    implementation(skikoAwt("linux-arm64:$skikoVer"))
+    val smVer = "1.0.8"
+    compileOnly("com.github.LaoLittle:SkikoMirai:$smVer")
+    testImplementation("com.github.LaoLittle:SkikoMirai:$smVer")
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 }
 

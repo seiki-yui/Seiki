@@ -4,11 +4,9 @@ package org.seiki.plugin
 
 import com.huaban.analysis.jieba.JiebaSegmenter
 import com.huaban.analysis.jieba.WordDictionary
-import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.*
 import net.mamoe.mirai.Bot
-import net.mamoe.mirai.contact.AudioSupported
-import net.mamoe.mirai.contact.Contact
-import net.mamoe.mirai.contact.MemberPermission
+import net.mamoe.mirai.contact.*
 import net.mamoe.mirai.event.AbstractEvent
 import net.mamoe.mirai.event.events.MessageEvent
 import net.mamoe.mirai.message.data.*
@@ -39,11 +37,13 @@ val biliVideoRegex =
 val bili23tvRegex = """[\s\S]*?((?:https?://)?(?:www\.)?b23\.tv/[a-zA-Z0-9]+)[\s\S]*?""".toRegex()
 val biliUserRegex = """[\s\S]*?(?:https?://)?(?:space\.bilibili\.com|bilibili\.com/space)/(\d+)[\s\S]*?""".toRegex()
 
-fun MemberPermission.getName(): String = when (this) {
+val MemberPermission.levelName: String get() = when (this) {
     MemberPermission.MEMBER -> "群员"
     MemberPermission.ADMINISTRATOR -> "管理员"
     MemberPermission.OWNER -> "群主"
 }
+
+val User.name: String get() = "${this.nameCardOrNick}(${this.id})"
 
 suspend fun Contact.uploadAsImage(url: String) =
     SweetBoy.getStream(url).use { it.uploadAsImage(this@uploadAsImage) }

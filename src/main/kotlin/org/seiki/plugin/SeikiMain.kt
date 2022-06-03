@@ -6,12 +6,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.mamoe.mirai.console.command.Command
 import net.mamoe.mirai.console.command.CommandManager
-import net.mamoe.mirai.console.command.CommandSender.Companion.asCommandSender
 import net.mamoe.mirai.console.command.descriptor.ExperimentalCommandDescriptors
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
-import net.mamoe.mirai.contact.nameCardOrNick
 import net.mamoe.mirai.event.broadcast
 import net.mamoe.mirai.event.events.*
 import net.mamoe.mirai.event.globalEventChannel
@@ -104,9 +102,7 @@ object SeikiMain : KotlinPlugin(
                     runCatching {
                         val json = gson.fromJson(it.content, BiliLight::class.java)
                         if (json.meta.detail_1.appid == "1109937557") {
-                            val url = SweetBoy.get(
-                                json.meta.detail_1.qqdocurl.substringBefore('?')
-                            ).use { r -> r.request.url.toString() }
+                            val url = SweetBoy.get(json.meta.detail_1.qqdocurl).use { r -> r.request.url.toString() }
                             val bv = url.matchRegexOrFail(biliVideoRegex)[1]
                             subject.biliVideo(bv)?.sendTo(subject)
                         } else logger.info { "BiliLight出了问题" }
@@ -140,19 +136,6 @@ object SeikiMain : KotlinPlugin(
                     else -> null
                 }?.sendTo(subject)
             }
-
-            """^#5k<([\s\S]*)><([\s\S]*)>$""".toRegex() finding {
-                val (top, bottom) = it.destructured
-                FiveK.apply {
-                    sender.asCommandSender(isTemp = false).handle(top, bottom)
-                }
-            }
-            """^#osu<([\s\S]+)>$""".toRegex() finding {
-                val (text) = it.destructured
-                Osu.apply {
-                    sender.asCommandSender(isTemp = false).handle(text)
-                }
-            }
             """^#consolas ([\s\S]+)$""".toRegex() findingReply { it.groupValues[1].consolas }
             """^#?(help|帮助|菜单)$""".toRegex() findingReply { "http://seiki.fun/wiki/seiki-bot/#%E4%BD%BF%E7%94%A8" }
             """^#throw$""".toRegex() finding {
@@ -165,7 +148,7 @@ object SeikiMain : KotlinPlugin(
                 subject.runCatching { throw Error("www") }
             }
             """^#发图 ([\s\S]+)$""".toRegex() findingReply {
-                subject.runCatching { Image(it.groupValues[1]) }
+                subject.runCatching { Image(it.groupValues[1]) }.getOrNull()
             }
             """^#get ([\s\S]+)$""".toRegex() findingReply {
                 subject.runCatching {
@@ -208,8 +191,8 @@ object SeikiMain : KotlinPlugin(
             launch {
                 delay(100L)
                 group.sendMessage(
-                    if (operator == null) "已口球${member.nameCardOrNick}(${member.id})"
-                    else "${member.nameCardOrNick}(${member.id})被${operatorOrBot.nameCardOrNick}(${operatorOrBot.id})塞了口球"
+                    if (operator == null) "已口球${member.name}"
+                    else "${member.name}被${operatorOrBot.name}塞了口球"
                 )
             }
         } // 禁言
@@ -217,42 +200,42 @@ object SeikiMain : KotlinPlugin(
             launch {
                 delay(100L)
                 group.sendMessage(
-                    if (operator == null) "已解禁${member.nameCardOrNick}(${member.id})"
-                    else "${member.nameCardOrNick}(${member.id})的口球被${operatorOrBot.nameCardOrNick}(${operatorOrBot.id})取了下来"
+                    if (operator == null) "已解禁${member.name}"
+                    else "${member.name}的口球被${operatorOrBot.name}取了下来"
                 )
             }
         } // 解禁
         eventChannel.subscribeAlways<MemberJoinEvent.Active> {
             launch {
                 delay(100L)
-                group.sendMessage("欢迎${member.nameCardOrNick}(${member.id})的加入")
+                group.sendMessage("欢迎${member.name}的加入")
             }
         } // 进群
         eventChannel.subscribeAlways<MemberJoinEvent.Invite> {
             launch {
                 delay(100L)
-                group.sendMessage("${invitor.nameCardOrNick}(${invitor.id})邀请${member.nameCardOrNick}(${member.id})加入了本群")
+                group.sendMessage("${invitor.name}邀请${member.name}加入了本群")
             }
         } // 拉群
         eventChannel.subscribeAlways<MemberLeaveEvent.Quit> {
             launch {
                 delay(100L)
-                group.sendMessage("${member.nameCardOrNick}(${member.id})逃跑了")
+                group.sendMessage("${member.name}逃跑了")
             }
         } // 退群
         eventChannel.subscribeAlways<MemberLeaveEvent.Kick> {
             launch {
                 delay(100L)
                 group.sendMessage(
-                    if (operator == null) "已飞机${member.nameCardOrNick}(${member.id})"
-                    else "${operatorOrBot.nameCardOrNick}(${operatorOrBot.id})飞机了${member.nameCardOrNick}(${member.id})"
+                    if (operator == null) "已飞机${member.name}"
+                    else "${operatorOrBot.name}飞机了${member.name}"
                 )
             }
         } // 踢群
         eventChannel.subscribeAlways<MemberPermissionChangeEvent> {
             launch {
                 delay(100L)
-                group.sendMessage("${member.nameCardOrNick}(${member.id})从${origin.getName()}便乘了${new.getName()}")
+                group.sendMessage("${member.name}从${origin.levelName}便乘了${new.levelName}")
             }
         } // 管理权限改变
     }

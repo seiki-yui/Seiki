@@ -74,6 +74,7 @@ object SeikiMain : KotlinPlugin(
             PatPat,
             PronHub,
             FiveK,
+            Flash,
             BlackWhite,
             Zero,
             Setu,

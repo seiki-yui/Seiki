@@ -193,7 +193,7 @@ object YinglishUtil {
             in arrayOf(",", "，", "。") -> return "..."
         }
         if (chars.size > 1 && randomOneTen() > 50)
-            return "${chars[0]}…${String(chars)}"
+            return "${chars[0]}❤...${String(chars)}"
         else if (part == "n" && randomOneTen() > 50) {
             repeat(chars.count()) { pon += "〇" }
             return pon

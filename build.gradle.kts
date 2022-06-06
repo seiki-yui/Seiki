@@ -24,12 +24,10 @@ fun skikoAwt(ver: String) = "org.jetbrains.skiko:skiko-awt-runtime-$ver"
 dependencies {
     implementation("com.google.code.gson:gson:2.9.0")
     implementation("cn.hutool:hutool-cron:5.8.2")
-//    implementation(skikoAwt("linux-arm64:$skikoVer"))
     val smVer = "1.0.8"
     compileOnly("com.github.LaoLittle:SkikoMirai:$smVer")
     testImplementation("com.github.LaoLittle:SkikoMirai:$smVer")
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
-    testImplementation(kotlin("script-runtime"))
 }
 
 tasks {

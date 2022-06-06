@@ -35,6 +35,13 @@ object SeikiMain : KotlinPlugin(
         name = "Seiki Main"
     ) {
         author("xiao-zheng233")
+        dependsOn(
+            "org.laolittle.plugin.SkikoMirai",
+            versionRequirement = ">=1.0.3",
+            // 前置插件是否可选
+            isOptional = true
+        )
+
     }
 ) {
 
@@ -148,10 +155,12 @@ object SeikiMain : KotlinPlugin(
                     SweetBoy.post(it.groupValues[1]).use { r -> r.body!!.string() }
                 }.getOrNull()
             }
+            "error" reply "error是帅哥"
         }
         eventChannel.subscribeAlways<BotOnlineEvent> {
             CronUtil.schedule("14 45 11,23 * * ?", Task {
-                suspend {
+                logger.info("666")
+                this@SeikiMain.launch {
                     bot.groups.forEach {
                         it.sendMessage("Seiki报时!\n现在是11:45:14")
                     }

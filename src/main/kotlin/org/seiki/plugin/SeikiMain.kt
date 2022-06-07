@@ -27,6 +27,7 @@ import org.seiki.plugin.command.audio.Say
 import org.seiki.plugin.command.card.*
 import org.seiki.plugin.command.image.*
 import org.seiki.plugin.command.plain.*
+import java.io.File
 
 object SeikiMain : KotlinPlugin(
     JvmPluginDescription(
@@ -41,7 +42,6 @@ object SeikiMain : KotlinPlugin(
             // 前置插件是否可选
             isOptional = true
         )
-
     }
 ) {
 
@@ -49,7 +49,7 @@ object SeikiMain : KotlinPlugin(
 
     @OptIn(ExperimentalCommandDescriptors::class, ConsoleExperimentalApi::class)
     override fun onEnable() {
-        logger.info { "Seiki Main loaded" }
+        logger.info { "Seiki Main Loaded!" }
         logger.info { Fonts["Consolas"].toString() }
         if (!System.getProperties().getProperty("os.name").startsWith("Windows")) {
             System.setProperty("java.awt.headless", "true")
@@ -154,6 +154,10 @@ object SeikiMain : KotlinPlugin(
                 subject.runCatching {
                     SweetBoy.post(it.groupValues[1]).use { r -> r.body!!.string() }
                 }.getOrNull()
+            }
+            """^尸骸之舞$""".toRegex() finding {
+                subject.uploadAsAudio(File("$audioFolder/vocaloid1.mp3")).sendTo(subject)
+                Image("{209274B1-3E09-6D32-C0EF-7FC70A6D06C6}.gif").sendTo(subject)
             }
             "error" reply "error是帅哥"
         }

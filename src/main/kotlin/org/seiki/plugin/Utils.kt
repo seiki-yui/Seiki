@@ -30,11 +30,12 @@ val biliVideoRegex =
 val bili23tvRegex = """[\s\S]*?((?:https?://)?(?:www\.)?b23\.tv/[a-zA-Z\d]+)[\s\S]*?""".toRegex()
 val biliUserRegex = """[\s\S]*?(?:https?://)?(?:space\.bilibili\.com|bilibili\.com/space)/(\d+)[\s\S]*?""".toRegex()
 
-val MemberPermission.levelName: String get() = when (this) {
-    MemberPermission.MEMBER -> "群员"
-    MemberPermission.ADMINISTRATOR -> "管理员"
-    MemberPermission.OWNER -> "群主"
-}
+val MemberPermission.levelName: String
+    get() = when (this) {
+        MemberPermission.MEMBER -> "群员"
+        MemberPermission.ADMINISTRATOR -> "管理员"
+        MemberPermission.OWNER -> "群主"
+    }
 
 val User.name: String get() = "${this.nameCardOrNick}(${this.id})"
 
@@ -50,18 +51,20 @@ suspend fun Contact.uploadAsAudio(url: String) =
 suspend fun Contact.uploadAsAudio(file: File) =
     file.toExternalResource().use { (this@uploadAsAudio as AudioSupported).uploadAudio(it) }
 
+fun Throwable.buildMessage() = buildMessageChain {
+    +PlainText("Warning! $this\n")
+    if (this@buildMessage.cause != null) +PlainText("Caused by: ${this@buildMessage.cause}")
+    +Image("{D3A4F304-847D-BB7B-1534-8ABFDC7575B4}.png")
+}
 suspend fun <T : Contact, R> T.runCatching(block: suspend T.() -> R): Result<R> {
     return try {
         Result.success(block())
     } catch (e: Throwable) {
-        buildMessageChain {
-            +PlainText("Warning! $e\n")
-            if (e.cause != null) +PlainText("Caused by: ${e.cause}")
-            +Image("{D3A4F304-847D-BB7B-1534-8ABFDC7575B4}.png")
-        }.sendTo(this)
+        e.buildMessage().sendTo(this)
         Result.failure<R>(e).also { throw e }
     }
 }
+
 
 /**
  * @author LaoLittle鸽鸽♡
@@ -93,7 +96,7 @@ suspend fun MessageEvent.getOrWait(): MessageChain? =
         }
     }
 
-@Deprecated("不适用",level = DeprecationLevel.WARNING)
+@Deprecated("不适用", level = DeprecationLevel.WARNING)
 val String.consolas: String
     get() {
         val hash: HashMap<String, String> = hashMapOf(

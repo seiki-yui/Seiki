@@ -1,7 +1,8 @@
 package org.seiki.plugin.command.image
 
-import net.mamoe.mirai.console.command.MemberCommandSenderOnMessage
+import net.mamoe.mirai.console.command.CommandSenderOnMessage
 import net.mamoe.mirai.console.command.SimpleCommand
+import net.mamoe.mirai.event.events.UserMessageEvent
 import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.Image.Key.queryUrl
 import net.mamoe.mirai.utils.ExternalResource.Companion.sendAsImageTo
@@ -10,7 +11,6 @@ import org.laolittle.plugin.Fonts
 import org.laolittle.plugin.toExternalResource
 import org.seiki.SweetBoy
 import org.seiki.plugin.SeikiMain
-
 import org.seiki.plugin.getOrWaitImage
 import org.seiki.plugin.runCatching
 import kotlin.math.min
@@ -20,8 +20,8 @@ object Zero : SimpleCommand(
     description = "生成0%加载图片"
 ) {
     @Handler
-    suspend fun MemberCommandSenderOnMessage.handle(/*number: Int = 0, */image: Image? = null) {
-        subject.runCatching {
+    suspend fun CommandSenderOnMessage<UserMessageEvent>.handle(image: Image? = null) {
+        subject!!.runCatching {
             val img = image ?: fromEvent.getOrWaitImage() ?: return@runCatching
 
             val skikoImage =
@@ -53,7 +53,7 @@ object Zero : SimpleCommand(
                     })
                 }
 
-                makeImageSnapshot().toExternalResource().use { it.sendAsImageTo(subject) }
+                makeImageSnapshot().toExternalResource().use { it.sendAsImageTo(subject!!) }
             }
         }
     }

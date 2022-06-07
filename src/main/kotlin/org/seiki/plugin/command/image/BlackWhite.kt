@@ -1,7 +1,8 @@
 package org.seiki.plugin.command.image
 
-import net.mamoe.mirai.console.command.MemberCommandSenderOnMessage
+import net.mamoe.mirai.console.command.CommandSenderOnMessage
 import net.mamoe.mirai.console.command.SimpleCommand
+import net.mamoe.mirai.event.events.UserMessageEvent
 import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.Image.Key.queryUrl
 import net.mamoe.mirai.utils.ExternalResource.Companion.sendAsImageTo
@@ -19,8 +20,8 @@ object BlackWhite : SimpleCommand(
     description = "生成黑白图"
 ) {
     @Handler
-    suspend fun MemberCommandSenderOnMessage.handle(content: String, image: Image? = null) {
-        subject.runCatching {
+    suspend fun CommandSenderOnMessage<UserMessageEvent>.handle(content: String, image: Image? = null) {
+        subject!!.runCatching {
             val img = image ?: fromEvent.getOrWaitImage() ?: return@runCatching
 
             val skikoImage =
@@ -52,7 +53,7 @@ object BlackWhite : SimpleCommand(
                     h + ((foo + text.height) / 2),
                     paint.apply { color = Color.WHITE })
             }
-            surface.makeImageSnapshot().toExternalResource().use { it.sendAsImageTo(subject) }
+            surface.makeImageSnapshot().toExternalResource().use { it.sendAsImageTo(subject!!) }
         }
     }
 }

@@ -8,6 +8,7 @@ import kotlinx.coroutines.TimeoutCancellationException
 import net.mamoe.mirai.contact.*
 import net.mamoe.mirai.event.events.MessageEvent
 import net.mamoe.mirai.message.data.*
+import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.MessageSource.Key.quote
 import net.mamoe.mirai.message.nextMessage
 import net.mamoe.mirai.utils.ExternalResource.Companion.toExternalResource
@@ -20,8 +21,20 @@ import org.laolittle.plugin.gif.buildGifImage
 import org.seiki.SweetBoy
 import org.seiki.plugin.SkikoUtil.bar
 import org.seiki.plugin.SkikoUtil.makeFromResource
+import org.seiki.plugin.UnvcodeUtil.MathUtil.minIndex
+import org.seiki.plugin.UnvcodeUtil.MathUtil.variance
+import java.awt.image.BufferedImage
+import java.awt.image.DataBufferInt
 import java.io.File
-import org.jetbrains.skia.Image as SkImage
+import java.text.Normalizer
+import kotlin.math.pow
+import org.jetbrains.skia.Image as SkiaImage
+import org.jetbrains.skia.Canvas as SkiaCanvas
+import org.jetbrains.skia.Color as SkiaColor
+import org.jetbrains.skia.Paint as SkiaPaint
+import org.jetbrains.skia.Point as SkiaPoint
+import java.awt.Color as AwtColor
+import java.awt.Font as AwtFont
 
 val ownerList = arrayListOf(2630557998L, 1812691029L)
 
@@ -209,7 +222,7 @@ object YinglishUtil {
  * @author LaoLittle鸽鸽♡
  */
 object SkikoUtil {
-    fun Canvas.bar(block: Canvas.() -> Unit) {
+    fun SkiaCanvas.bar(block: SkiaCanvas.() -> Unit) {
         save()
         block()
         restore()
@@ -222,7 +235,7 @@ object SkikoUtil {
         bottom: Float = this.bottom
     ) = Rect(left, top, right, bottom)
 
-    internal fun SkImage.Companion.makeFromResource(name: String) = makeFromEncoded(
+    internal fun SkiaImage.Companion.makeFromResource(name: String) = makeFromEncoded(
         SeikiMain::class.java.getResourceAsStream(name)?.readBytes() ?: throw IllegalStateException("无法找到资源文件: $name")
     )
 }
@@ -234,23 +247,23 @@ object PatPatUtil {
     private const val width = 320
     private const val height = 320
 
-    suspend fun patpat(image: SkImage, delay: Double = .05): GifImage {
+    suspend fun patpat(image: SkiaImage, delay: Double = .05): GifImage {
         return buildGifImage(GifSetting(width, height, 100, true, GifSetting.Repeat.Infinite)) {
-            addFrame(pat(Rect(40f, 40f, 300f, 300f), Point(0f, 0f), image, 0).getBytes(), delay)
-            addFrame(pat(Rect(40f, 70f, 300f, 300f), Point(0f, 0f), image, 1).getBytes(), delay)
-            addFrame(pat(Rect(33f, 105f, 300f, 300f), Point(0f, 0f), image, 2).getBytes(), delay)
-            addFrame(pat(Rect(37f, 90f, 300f, 300f), Point(0f, 0f), image, 3).getBytes(), delay)
-            addFrame(pat(Rect(40f, 65f, 300f, 300f), Point(0f, 0f), image, 4).getBytes(), delay)
+            addFrame(pat(Rect(40f, 40f, 300f, 300f), SkiaPoint(0f, 0f), image, 0).getBytes(), delay)
+            addFrame(pat(Rect(40f, 70f, 300f, 300f), SkiaPoint(0f, 0f), image, 1).getBytes(), delay)
+            addFrame(pat(Rect(33f, 105f, 300f, 300f), SkiaPoint(0f, 0f), image, 2).getBytes(), delay)
+            addFrame(pat(Rect(37f, 90f, 300f, 300f), SkiaPoint(0f, 0f), image, 3).getBytes(), delay)
+            addFrame(pat(Rect(40f, 65f, 300f, 300f), SkiaPoint(0f, 0f), image, 4).getBytes(), delay)
         }
     }
 
-    private val whitePaint = Paint().apply { color = Color.WHITE }
-    private val srcInPaint = Paint().apply { blendMode = BlendMode.SRC_IN }
-    private val hands = Array(5) { SkImage.makeFromResource("/data/PatPat/img$it.png") }
+    private val whitePaint = SkiaPaint().apply { color = SkiaColor.WHITE }
+    private val srcInPaint = SkiaPaint().apply { blendMode = BlendMode.SRC_IN }
+    private val hands = Array(5) { SkiaImage.makeFromResource("/data/PatPat/img$it.png") }
 
     private const val imgW = width.toFloat()
     private const val imgH = height.toFloat()
-    fun pat(imgDst: Rect, handPoint: Point, image: SkImage, no: Int): SkImage {
+    fun pat(imgDst: Rect, handPoint: SkiaPoint, image: SkiaImage, no: Int): SkiaImage {
         val hand = hands[no]
         return Surface.makeRasterN32Premul(width, height).apply {
             canvas.apply {
@@ -279,4 +292,112 @@ object PatPatUtil {
             }
         }.makeImageSnapshot()
     }
+}
+
+object UnvcodeUtil {
+    object MathUtil {
+        fun List<Int>.sum(): Int {
+            var sum = 0
+            this.forEach { sum += it }
+            return sum
+        }
+
+        fun List<Int>.average(): Double = this.sum().toDouble() / this.size
+
+        fun List<Int>.variance(): Double {
+            val average = this.average()
+            var variance = 0.0
+            this.forEach {
+                variance += ((it - average).pow(2.0))
+            }
+            return variance / this.size
+        }
+
+        infix fun List<Int>.minus(other: List<Int>): List<Int> {
+            if (this.size != other.size) throw Throwable("?!")
+            return mutableListOf<Int>().apply {
+                for (i in 0..this@minus.lastIndex) {
+                    add(this@minus[i] - other[i])
+                }
+            }
+        }
+
+        fun List<Double>.minIndex(): Int {
+            var minIndex = 0
+            for (i in 1..this.lastIndex) {
+                if (this[i] < this[minIndex])minIndex=i
+            }
+            return minIndex
+        }
+    }
+
+    private val d = mutableMapOf<Char, MutableList<Char>>()
+
+    init {
+        for (i in 0 until 65536) {
+            val word = i.toChar()
+            val key = Normalizer.normalize(word.toString(), Normalizer.Form.NFKC).toCharArray()[0]
+            if (word != key) {
+                d.putIfAbsent(key, mutableListOf())
+                d[key]?.add(word)
+            }
+        }
+    }
+
+    private fun draw(key: Char): List<Int> {
+        var img = BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB)
+        val fnt = AwtFont(null, AwtFont.PLAIN, 100)
+        var g2d = img.createGraphics()
+        g2d.font = fnt
+        val fm = g2d.fontMetrics
+        val width = fm.stringWidth(key.toString())
+        val height = fm.height
+        g2d.dispose()
+        img = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
+        g2d = img.createGraphics()
+        g2d.color = AwtColor.BLACK
+        g2d.fillRect(0, 0, img.width, img.height)
+        g2d.color = AwtColor.WHITE
+        g2d.font = fnt
+        g2d.drawString(key.toString(), 0, fm.ascent)
+        g2d.dispose()
+        //ImageIO.write(img, "png", File("/Users/lz233/Desktop/1.png"))
+        return mutableListOf<Int>().apply {
+            (img.raster.dataBuffer as DataBufferInt).data.forEach {
+                val color = AwtColor(it)
+                add(color.red / 255)
+                add(color.green / 255)
+                add(color.blue / 255)
+            }
+        }
+    }
+
+    private fun compare(key1: Char, key2: Char) = (draw(key1) - draw(key2).toSet()).variance()
+
+    private fun masquerade(key: Char, skipAscii: Boolean, mse: Double = 0.1): Pair<Double, Char> {
+        if ((key.code < 128) and skipAscii) return (-1.0 to key)
+        val candidateGroup = d[key] ?: return (-1.0 to key)
+        val differenceGroup = mutableListOf<Double>().apply {
+            candidateGroup.forEach { add(compare(key, it)) }
+        }
+        val difference = differenceGroup.minOrNull()!!
+        val new = candidateGroup[differenceGroup.minIndex()]
+        return if (difference > mse) (-1.0 to key) else (difference to new)
+    }
+
+    fun convert(s: String, skipAscii: Boolean = true, mse: Double = 0.1): Pair<String, List<Double>> {
+        val differenceList = mutableListOf<Double>()
+        val str = StringBuilder().apply {
+            s.toCharArray().forEach {
+                val result = masquerade(it, skipAscii, mse)
+                differenceList.add(result.first)
+                append(result.second)
+            }
+        }.toString()
+        return (str to differenceList)
+    }
+
+    fun String.unvcode(skipAscii: Boolean = true, mse: Double = 0.1) = convert(this, skipAscii, mse)
+
+    val String.unvcode get() = this.unvcode().first
 }

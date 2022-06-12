@@ -18,13 +18,13 @@ import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.LightApp
 import net.mamoe.mirai.message.data.sendTo
 import net.mamoe.mirai.utils.info
-import org.laolittle.plugin.Fonts
 import org.seiki.SweetBoy
 import org.seiki.SweetBoy.matchRegex
 import org.seiki.SweetBoy.matchRegexOrFail
 import org.seiki.plugin.command.audio.Audio
 import org.seiki.plugin.command.audio.Say
 import org.seiki.plugin.command.card.*
+import org.seiki.plugin.command.file.Upload
 import org.seiki.plugin.command.image.*
 import org.seiki.plugin.command.plain.*
 import java.io.File
@@ -39,18 +39,19 @@ object SeikiMain : KotlinPlugin(
         dependsOn(
             "org.laolittle.plugin.SkikoMirai",
             versionRequirement = ">=1.0.3",
-            // 前置插件是否可选
+            isOptional = true
+        )
+        dependsOn(
+            "com.huaban.analysis.jieba.JiebaSegmenter",
             isOptional = true
         )
     }
 ) {
-
     val audioFolder = dataFolder.resolve("audio")
 
     @OptIn(ExperimentalCommandDescriptors::class, ConsoleExperimentalApi::class)
     override fun onEnable() {
         logger.info { "Seiki Main Loaded!" }
-        logger.info { Fonts["Consolas"].toString() }
         if (!System.getProperties().getProperty("os.name").startsWith("Windows")) {
             System.setProperty("java.awt.headless", "true")
         }
@@ -59,6 +60,7 @@ object SeikiMain : KotlinPlugin(
             Gpbt,
             Form,
             Two,
+            Unvcode,
             Dazs,
             Kfc,
             Diana,
@@ -89,7 +91,8 @@ object SeikiMain : KotlinPlugin(
             Cosplay,
             Audio,
             Say,
-            BuildForward
+            BuildForward,
+            Upload
         )
         commandList.forEach {
             CommandManager.registerCommand(it)
@@ -98,6 +101,7 @@ object SeikiMain : KotlinPlugin(
         eventChannel.subscribeAlways<MessageEvent> {
             message.forEach {
                 if (it is LightApp) {
+                    logger.info { it.toString() }
                     val gson = Gson()
                     // 1105517988 哔哩哔哩HD 类XML的JSON卡片 MiraiApp
                     // 100951776 哔哩哔哩 类XML的JSON卡片 MiraiApp
@@ -182,7 +186,7 @@ object SeikiMain : KotlinPlugin(
         eventChannel.subscribeAlways<BotJoinGroupEvent> {
             launch {
                 delay(100L)
-                group.sendMessage("这里是Seiki.发送\"# help\"来康教程.")
+                group.sendMessage("这里是Seiki Bot.使用教程:\nhttp://seiki.fun/wiki/seiki-bot/#%E4%BD%BF%E7%94%A8")
             }
         } // bot进群
         eventChannel.subscribeAlways<NudgeEvent> {

@@ -136,6 +136,7 @@ object SeikiMain : KotlinPlugin(
                     else -> null
                 }?.sendTo(subject)
             }
+
             """^#?(help|帮助|菜单)$""".toRegex() findingReply { "http://seiki.fun/wiki/seiki-bot/#%E4%BD%BF%E7%94%A8" }
             """^#throw$""".toRegex() finding {
                 subject.runCatching { throw Throwable("www") }

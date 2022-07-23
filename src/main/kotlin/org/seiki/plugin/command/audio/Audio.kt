@@ -14,7 +14,7 @@ object Audio : CompositeCommand(
     description = "音频"
 ) {
     @SubCommand
-    @Description("发送文件")
+    @Description("发送文件为语音")
     suspend fun UserCommandSender.send(path: String) {
         subject.runCatching {
             subject.uploadAsAudio(File("$audioFolder/$path")).sendTo(subject)

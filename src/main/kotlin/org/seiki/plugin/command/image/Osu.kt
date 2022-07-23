@@ -3,46 +3,41 @@ package org.seiki.plugin.command.image
 import net.mamoe.mirai.console.command.SimpleCommand
 import net.mamoe.mirai.console.command.UserCommandSender
 import net.mamoe.mirai.utils.ExternalResource.Companion.sendAsImageTo
-import org.jetbrains.skia.Color
-import org.jetbrains.skia.Paint
-import org.jetbrains.skia.Surface
-import org.jetbrains.skia.TextLine
+import org.jetbrains.skia.*
 import org.laolittle.plugin.Fonts
 import org.laolittle.plugin.toExternalResource
 import org.seiki.plugin.SeikiMain
+import org.seiki.plugin.SkikoUtil.makeFromResource
 
 object Osu : SimpleCommand(
     SeikiMain, "osu",
     description = "生成OSU风格的图标"
 ) {
-    private val res: ByteArray =
-        SeikiMain::class.java.getResourceAsStream("/data/Osu/osuLogo.png")!!.use { it.readBytes() }
-
+    private val paintText = Paint().apply { color = Color.WHITE }
+    private val osuImage = Image.makeFromResource("/Osu/logo.png")
+    private val font = Fonts["Aller-Bold", 112.5F]
     /**
      * @author xiao_zheng
      * 自己写的 哼o(´^｀)o
+     * 由LaoLittle改良Super版本（
      */
     @Handler
     suspend fun UserCommandSender.handle(text: String = "osu!") {
-        val paint = Paint().apply {
-            isAntiAlias = true
-            color = Color.WHITE
+        val yPos: Float
+        var osuText = TextLine.make(text, font)
+        val textWidth = osuText.width
+
+        if (textWidth <= 250) yPos = 137.5F + osuText.height / 2
+        else {
+            yPos = 210 - (textWidth - 255) / 20
+            osuText = TextLine.make(text, font.makeWithSize(250F / textWidth * 112.5F))
         }
-        val image =
-            org.jetbrains.skia.Image.makeFromEncoded(res)
-        var osuText = TextLine.make(text, Fonts["Aller-Bold.ttf", 112.5F])
-        var yPos = 137.5F + osuText.height / 2
-        if (osuText.width > 250) {
-            yPos = 210 - (osuText.width - 255) / 20
-            osuText = TextLine.make(text, Fonts["Aller-Bold.ttf", 250F / osuText.width * 112.5F])
-        }
-        val surface = Surface.makeRasterN32Premul(350, 350)
-        surface.apply {
+
+        Surface.makeRasterN32Premul(350, 350).apply {
             canvas.apply {
-                drawImage(image, 0F, 0F)
-                drawTextLine(osuText, 175F - osuText.width / 2, yPos, paint)
+                drawImage(osuImage, 0F, 0F)
+                drawTextLine(osuText, 175F - osuText.width / 2, yPos, paintText)
             }
-        }
-        surface.makeImageSnapshot().toExternalResource().use { it.sendAsImageTo(subject) }
+        }.makeImageSnapshot().toExternalResource().use { it.sendAsImageTo(subject) }
     }
 }

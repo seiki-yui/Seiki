@@ -64,8 +64,26 @@ suspend fun Contact.uploadAsAudio(url: String) =
 suspend fun Contact.uploadAsAudio(file: File) =
     file.toExternalResource().use { (this@uploadAsAudio as AudioSupported).uploadAudio(it) }
 
+fun String.convert(max: Int = 200): ArrayList<String> {
+    var num = 0
+    var len = 0
+    var str = ""
+    val list: ArrayList<String> = arrayListOf()
+    this.split("\n").forEach {
+        num += it.length
+        len += it.length
+        if (num < max) str += it + "\n" else {
+            list.add(str)
+            str = ""
+            num = 0
+        }
+    }
+    if (len < max) list.add(str)
+    return list
+}
+
 fun Throwable.buildMessage() = buildMessageChain {
-    +PlainText("Warning! $this\n")
+    +PlainText("Warning! ${this@buildMessage}\n")
     if (this@buildMessage.cause != null) +PlainText("Caused by: ${this@buildMessage.cause}")
     +Image("{D3A4F304-847D-BB7B-1534-8ABFDC7575B4}.png")
 }

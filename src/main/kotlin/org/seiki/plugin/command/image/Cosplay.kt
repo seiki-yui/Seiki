@@ -15,7 +15,7 @@ import org.seiki.plugin.uploadAsImage
 
 object Cosplay : SimpleCommand(
     SeikiMain, "cos", "cosplay",
-    description = "Cosplay图片，打包为聊天记录"
+    description = "Cosplay图片，打包为聊天记录(不推荐)"
 ) {
     @Handler
     suspend fun UserCommandSender.handle() {
@@ -24,7 +24,7 @@ object Cosplay : SimpleCommand(
         if (json.code == "1") {
             val start = System.currentTimeMillis()
             val data = json.data.data
-            sendMessage(if (data.size >= 100) "oh shit 图片超过100张！" else "有${data.size}张图片待发送，请稍等……")
+            sendMessage(if (data.size >= 99) "oh shit 图片超过100张！" else "有${data.size}张图片待发送，请稍等……")
             buildForwardMessage(subject) {
                 add(bot, PlainText(json.data.Title))
                 var time = System.currentTimeMillis()

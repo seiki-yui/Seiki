@@ -14,6 +14,7 @@ import net.mamoe.mirai.console.util.ConsoleExperimentalApi
 import net.mamoe.mirai.event.events.*
 import net.mamoe.mirai.event.globalEventChannel
 import net.mamoe.mirai.event.subscribeMessages
+import net.mamoe.mirai.message.code.MiraiCode.deserializeMiraiCode
 import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.LightApp
 import net.mamoe.mirai.message.data.sendTo
@@ -24,10 +25,10 @@ import org.seiki.SweetBoy.matchRegexOrFail
 import org.seiki.plugin.command.audio.Audio
 import org.seiki.plugin.command.audio.Say
 import org.seiki.plugin.command.card.*
-import org.seiki.plugin.command.file.Upload
+import org.seiki.plugin.command.file.File
 import org.seiki.plugin.command.image.*
 import org.seiki.plugin.command.plain.*
-import java.io.File
+
 
 object SeikiMain : KotlinPlugin(
     JvmPluginDescription(
@@ -92,7 +93,7 @@ object SeikiMain : KotlinPlugin(
             Audio,
             Say,
             BuildForward,
-            Upload
+            File
         )
         commandList.forEach {
             CommandManager.registerCommand(it)
@@ -150,6 +151,9 @@ object SeikiMain : KotlinPlugin(
             """^#发图 ([\s\S]+)$""".toRegex() findingReply {
                 subject.runCatching { Image(it.groupValues[1]) }.getOrNull()
             }
+            """^#mirai码 ([\s\S]+)$""".toRegex() findingReply {
+                subject.runCatching { it.groupValues[1].deserializeMiraiCode() }.getOrNull()
+            }
             """^#get ([\s\S]+)$""".toRegex() findingReply {
                 subject.runCatching {
                     SweetBoy.get(it.groupValues[1]).use { r -> r.body!!.string() }
@@ -161,7 +165,7 @@ object SeikiMain : KotlinPlugin(
                 }.getOrNull()
             }
             """^尸骸之舞$""".toRegex() finding {
-                subject.uploadAsAudio(File("$audioFolder/vocaloid1.mp3")).sendTo(subject)
+                subject.uploadAsAudio(java.io.File("$audioFolder/vocaloid1.mp3")).sendTo(subject)
                 Image("{209274B1-3E09-6D32-C0EF-7FC70A6D06C6}.gif").sendTo(subject)
             }
             "error" reply "error是帅哥"

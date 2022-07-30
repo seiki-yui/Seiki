@@ -6,16 +6,19 @@ import net.mamoe.mirai.message.data.MessageChain
 import net.mamoe.mirai.message.data.PlainText
 import net.mamoe.mirai.message.data.buildMessageChain
 import net.mamoe.mirai.message.data.messageChainOf
+import net.mamoe.mirai.utils.info
 import org.seiki.SweetBoy
 import org.seiki.SweetBoy.matchRegexOrFail
 import org.seiki.SweetBoy.transToNum
 import org.seiki.SweetBoy.transToTime
+import org.seiki.plugin.SeikiMain
 import org.seiki.plugin.runCatching
 import org.seiki.plugin.uploadAsImage
 import java.awt.Dimension
 
 suspend fun Contact.biliVideo(id: String): MessageChain? =
     this.runCatching {
+        SeikiMain.logger.info { id }
         val isBv = if ("""[bB][vV][a-zA-Z0-9]+""".toRegex().matches(id)) true
         else if ("""[aA][vV]\d+""".toRegex().matches(id)) false
         else throw NoSuchElementException("AV/BV号格式错误")
@@ -23,6 +26,7 @@ suspend fun Contact.biliVideo(id: String): MessageChain? =
             id.matchRegexOrFail("""[bB][vV]([a-zA-Z0-9]+)""".toRegex())[1]
         else
             id.matchRegexOrFail("""[aA][vV](\d+)""".toRegex())[1]
+        SeikiMain.logger.info { id2 }
         val rel1 =
             SweetBoy.get("http://api.bilibili.com/x/web-interface/view?${if (isBv) "bv" else "a"}id=$id2").use {
                 it.body!!.string()
@@ -177,7 +181,7 @@ data class HonorReply(
 
 data class Owner(
     val face: String,
-    val mid: Int,
+    val mid: Long,
     val name: String
 )
 
@@ -320,7 +324,7 @@ data class DataX(
     val is_pay: Int,
     val is_union_video: Int,
     val like: Int,
-    val mid: Int,
+    val mid: Long,
     val new_rec_tags: List<Any>,
     val pic: String,
     val play: Int,

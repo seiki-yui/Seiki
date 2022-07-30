@@ -19,6 +19,7 @@ import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.LightApp
 import net.mamoe.mirai.message.data.sendTo
 import net.mamoe.mirai.utils.info
+import okhttp3.internal.wait
 import org.seiki.SweetBoy
 import org.seiki.SweetBoy.matchRegex
 import org.seiki.SweetBoy.matchRegexOrFail
@@ -127,7 +128,10 @@ object SeikiMain : KotlinPlugin(
             }
         }
         eventChannel.subscribeMessages {
-            biliVideoRegex findingReply { subject.biliVideo(it.groupValues[1]) }
+            biliVideoRegex findingReply {
+                logger.info { it.groupValues[1] }
+                subject.biliVideo(it.groupValues[1])
+            }
             biliUserRegex findingReply { subject.biliUser(it.groupValues[1].toLong()) }
             bili23tvRegex finding {
                 val url = SweetBoy.get(it.groupValues[1]).use { r -> r.request.url }.toString()
@@ -151,6 +155,9 @@ object SeikiMain : KotlinPlugin(
             """^#发图 ([\s\S]+)$""".toRegex() findingReply {
                 subject.runCatching { Image(it.groupValues[1]) }.getOrNull()
             }
+            """^#取图$""".toRegex() findingReply {
+                subject.runCatching { getOrWaitImage()?.imageId }.getOrNull()
+            }
             """^#mirai码 ([\s\S]+)$""".toRegex() findingReply {
                 subject.runCatching { it.groupValues[1].deserializeMiraiCode() }.getOrNull()
             }
@@ -167,6 +174,10 @@ object SeikiMain : KotlinPlugin(
             """^尸骸之舞$""".toRegex() finding {
                 subject.uploadAsAudio(java.io.File("$audioFolder/vocaloid1.mp3")).sendTo(subject)
                 Image("{209274B1-3E09-6D32-C0EF-7FC70A6D06C6}.gif").sendTo(subject)
+            }
+            """^咖喱乌冬$""".toRegex() finding {
+                subject.uploadAsAudio(java.io.File("$audioFolder/vocaloid2.mp3")).sendTo(subject)
+                Image("{1AF4FC8F-299A-F22F-A348-83F29D190117}.gif").sendTo(subject)
             }
             "error" reply "error是帅哥"
         }

@@ -14,7 +14,7 @@ object Osu : SimpleCommand(
     description = "生成OSU风格的图标"
 ) {
     private val paintText = Paint().apply { color = Color.WHITE }
-    private val osuImage = Image.makeFromResource("/Osu/logo.png")
+    private val osuImage = Image.makeFromResource("/data/Osu/osuLogo.png")
     private val font = Fonts["Aller-Bold", 112.5F]
     /**
      * @author xiao_zheng

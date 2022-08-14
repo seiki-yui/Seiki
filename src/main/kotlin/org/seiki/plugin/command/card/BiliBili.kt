@@ -17,7 +17,7 @@ import org.seiki.plugin.uploadAsImage
 import java.awt.Dimension
 
 suspend fun Contact.biliVideo(id: String): MessageChain? =
-    this.runCatching {
+    /*this.*/runCatching {
         SeikiMain.logger.info { id }
         val isBv = if ("""[bB][vV][a-zA-Z0-9]+""".toRegex().matches(id)) true
         else if ("""[aA][vV]\d+""".toRegex().matches(id)) false

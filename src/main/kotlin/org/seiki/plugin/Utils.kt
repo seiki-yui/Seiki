@@ -42,6 +42,7 @@ val biliVideoRegex =
     """[\s\S]*?(?:(?:https?://)?(?:www\.)?bilibili\.com/video/)?([aA][vV]\d+|[bB][vV][a-zA-Z\d]+)[\s\S]*?""".toRegex()
 val bili23tvRegex = """[\s\S]*?((?:https?://)?(?:www\.)?b23\.tv/[a-zA-Z\d]+)[\s\S]*?""".toRegex()
 val biliUserRegex = """[\s\S]*?(?:https?://)?(?:space\.bilibili\.com|bilibili\.com/space)/(\d+)[\s\S]*?""".toRegex()
+val biliUserIDRegex = """[\s\S]*?[uU][iI][dD]:?(\d+)[\s\S]*?""".toRegex()
 
 val MemberPermission.levelName: String
     get() = when (this) {

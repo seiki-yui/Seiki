@@ -19,7 +19,6 @@ import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.LightApp
 import net.mamoe.mirai.message.data.sendTo
 import net.mamoe.mirai.utils.info
-import okhttp3.internal.wait
 import org.seiki.SweetBoy
 import org.seiki.SweetBoy.matchRegex
 import org.seiki.SweetBoy.matchRegexOrFail
@@ -133,6 +132,7 @@ object SeikiMain : KotlinPlugin(
                 subject.biliVideo(it.groupValues[1])
             }
             biliUserRegex findingReply { subject.biliUser(it.groupValues[1].toLong()) }
+            biliUserIDRegex findingReply { subject.biliUser(it.groupValues[1].toLong()) }
             bili23tvRegex finding {
                 val url = SweetBoy.get(it.groupValues[1]).use { r -> r.request.url }.toString()
                 when {
@@ -179,7 +179,7 @@ object SeikiMain : KotlinPlugin(
                 subject.uploadAsAudio(java.io.File("$audioFolder/vocaloid2.mp3")).sendTo(subject)
                 Image("{1AF4FC8F-299A-F22F-A348-83F29D190117}.gif").sendTo(subject)
             }
-            "error" reply "error是帅哥"
+//            "error" reply "error是帅哥"
         }
         eventChannel.subscribeAlways<BotOnlineEvent> {
             CronUtil.schedule("14 45 11,23 * * ?", Task {

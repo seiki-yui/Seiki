@@ -1,12 +1,15 @@
 package org.seiki.plugin.command.card
 
 import com.google.gson.Gson
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import net.mamoe.mirai.contact.Contact
 import net.mamoe.mirai.message.data.MessageChain
 import net.mamoe.mirai.message.data.PlainText
 import net.mamoe.mirai.message.data.buildMessageChain
 import net.mamoe.mirai.message.data.messageChainOf
 import net.mamoe.mirai.utils.info
+import okhttp3.Request
 import org.seiki.SweetBoy
 import org.seiki.SweetBoy.matchRegexOrFail
 import org.seiki.SweetBoy.transToNum
@@ -16,49 +19,65 @@ import org.seiki.plugin.runCatching
 import org.seiki.plugin.uploadAsImage
 import java.awt.Dimension
 
-suspend fun Contact.biliVideo(id: String): MessageChain? =
-    /*this.*/runCatching {
-        SeikiMain.logger.info { id }
-        val isBv = if ("""[bB][vV][a-zA-Z0-9]+""".toRegex().matches(id)) true
-        else if ("""[aA][vV]\d+""".toRegex().matches(id)) false
-        else throw NoSuchElementException("AV/BV号格式错误")
-        val id2 = if (isBv)
-            id.matchRegexOrFail("""[bB][vV]([a-zA-Z0-9]+)""".toRegex())[1]
-        else
-            id.matchRegexOrFail("""[aA][vV](\d+)""".toRegex())[1]
-        SeikiMain.logger.info { id2 }
-        val rel1 =
-            SweetBoy.get("http://api.bilibili.com/x/web-interface/view?${if (isBv) "bv" else "a"}id=$id2").use {
-                it.body!!.string()
-            }
-        val rel2 =
-            SweetBoy.get("http://api.bilibili.com/x/web-interface/search/all/v2?keyword=${if (isBv) "BV" else "av"}$id2")
-                .use {
-                    it.body!!.string()
-                }
-        val gson = Gson()
-        val json1 = gson.fromJson(rel1, BiliVideoApi::class.java)
-        val json2 = gson.fromJson(rel2, BiliSearchApi::class.java)
-        val data1 = json1.data
-        val data2 = json2.data.result.last().data.first()
-        return@runCatching (if (json1.code == 0) buildMessageChain {
-            +this@biliVideo.uploadAsImage(json1.data.pic)
-            +PlainText(json1.data.title + "\n")
-            +PlainText("https://www.bilibili.com/video/${json1.data.bvid}/\n")
-            +PlainText("${data1.bvid} - av${data1.aid}\n")
-            +PlainText("${data2.typename}-${if (data1.copyright == 1) "自制" else "转载"}(${data2.tag})\n")
-            +PlainText("📅${(data2.pubdate * 1000L).transToTime()} 🕑${data2.duration}\n")
-            +PlainText("▶${data1.stat.view.transToNum(1)} ")
-            +PlainText("🈂${data1.stat.danmaku.transToNum(1)}\n")
-            +PlainText("👍${data1.stat.like.transToNum(1)} ")
-            +PlainText("⭐${data1.stat.favorite.transToNum(1)} ")
-            +PlainText("💰${data1.stat.coin.transToNum(1)} ")
-            +PlainText("↗${data1.stat.share.transToNum(1)}\n")
-            +PlainText("💬${data1.stat.reply.transToNum(1)} ")
-            +PlainText("🆙${data1.owner.name} (${json1.data.owner.mid})\n")
-            +PlainText(json1.data.desc)
-        } else messageChainOf(PlainText(json1.message)))
-    }.getOrNull()
+// 出现-412报错, 带上cookie请求好了
+suspend fun Contact.biliVideo(id: String): MessageChain? = kotlin.runCatching {
+    SeikiMain.logger.info { id }
+    val isBv = if ("""[bB][vV][a-zA-Z\d]+""".toRegex().matches(id)) true
+    else if ("""[aA][vV]\d+""".toRegex().matches(id)) false
+    else throw NoSuchElementException("AV/BV号格式错误")
+    val id2 = if (isBv)
+        id.matchRegexOrFail("""[bB][vV]([a-zA-Z\d]+)""".toRegex())[1]
+    else
+        id.matchRegexOrFail("""[aA][vV](\d+)""".toRegex())[1]
+    SeikiMain.logger.info { id2 }
+    val rel1 =
+        withContext(Dispatchers.IO) {
+            SweetBoy.okHttpClient.newCall(
+                Request.Builder().url("http://api.bilibili.com/x/web-interface/view?${if (isBv) "bv" else "a"}id=$id2")
+                    .addHeader("Cookie", "buvid3=6BD8010E-F797-8808-D9E6-0913F812288546153infoc; _uuid=972C1493-ED93-3B108-1D89-E6F61664A6C346681infoc; buvid4=950A7014-71E1-15CB-10B0-662ACFFA15BF21846-022031920-Mk4wjKcJQ47KjNQGJwpQKxBer8zocNH269qbDRDXFOclP7ut3dkQYw%3D%3D; blackside_state=0; rpdid=0zbfAHMGzq|sWczhSWD|2qf|3w1O9Zzg; buvid_fp_plain=undefined; i-wanna-go-back=-1; nostalgia_conf=-1; CURRENT_BLACKGAP=0; hit-dyn-v2=1; CURRENT_QUALITY=80; bp_video_offset_358287382=688705457682907100; bili_jct=a505ce9881046705da534d1e647eb92d; DedeUserID=421909600; DedeUserID__ckMd5=b0b00ba70c32e4bb; sid=5e3n0i4c; b_ut=5; PVID=1; bp_video_offset_421909600=694630099042959400; CURRENT_FNVAL=16; b_lsid=2DDB6D3E_182D3D5EFA3; fingerprint=b8c0d7bd03e6ca70a3fc5a04d55315e7; bsource=share_source_copy_link; buvid_fp=b8c0d7bd03e6ca70a3fc5a04d55315e7; innersign=0; b_timer=%7B%22ffp%22%3A%7B%22333.976.fp.risk_6BD8010E%22%3A%22182D3D5F755%22%2C%22333.1193.fp.risk_6BD8010E%22%3A%22182D3D6043F%22%2C%22333.963.fp.risk_6BD8010E%22%3A%22182D3D6A779%22%2C%22888.43720.fp.risk_6BD8010E%22%3A%22182D3D78D1B%22%2C%22333.1007.fp.risk_6BD8010E%22%3A%22182D3D8D68E%22%2C%22333.337.fp.risk_6BD8010E%22%3A%22182D3D8E37A%22%7D%7D")
+                    .build()
+            ).execute()
+        }.use {
+            it.body!!.string()
+        }
+    val rel2 = withContext(Dispatchers.IO) {
+            SweetBoy.okHttpClient.newCall(
+                Request.Builder().url("http://api.bilibili.com/x/web-interface/search/all/v2?keyword=${if (isBv) "BV" else "av"}$id2")
+                    .addHeader("Cookie", "buvid3=6BD8010E-F797-8808-D9E6-0913F812288546153infoc; _uuid=972C1493-ED93-3B108-1D89-E6F61664A6C346681infoc; buvid4=950A7014-71E1-15CB-10B0-662ACFFA15BF21846-022031920-Mk4wjKcJQ47KjNQGJwpQKxBer8zocNH269qbDRDXFOclP7ut3dkQYw%3D%3D; blackside_state=0; rpdid=0zbfAHMGzq|sWczhSWD|2qf|3w1O9Zzg; buvid_fp_plain=undefined; i-wanna-go-back=-1; nostalgia_conf=-1; CURRENT_BLACKGAP=0; hit-dyn-v2=1; CURRENT_QUALITY=80; bp_video_offset_358287382=688705457682907100; bili_jct=a505ce9881046705da534d1e647eb92d; DedeUserID=421909600; DedeUserID__ckMd5=b0b00ba70c32e4bb; sid=5e3n0i4c; b_ut=5; PVID=1; bp_video_offset_421909600=694630099042959400; CURRENT_FNVAL=16; b_lsid=2DDB6D3E_182D3D5EFA3; fingerprint=b8c0d7bd03e6ca70a3fc5a04d55315e7; bsource=share_source_copy_link; buvid_fp=b8c0d7bd03e6ca70a3fc5a04d55315e7; innersign=0; b_timer=%7B%22ffp%22%3A%7B%22333.976.fp.risk_6BD8010E%22%3A%22182D3D5F755%22%2C%22333.1193.fp.risk_6BD8010E%22%3A%22182D3D6043F%22%2C%22333.963.fp.risk_6BD8010E%22%3A%22182D3D6A779%22%2C%22888.43720.fp.risk_6BD8010E%22%3A%22182D3D78D1B%22%2C%22333.1007.fp.risk_6BD8010E%22%3A%22182D3D8D68E%22%2C%22333.337.fp.risk_6BD8010E%22%3A%22182D3D8E37A%22%7D%7D")
+                    .build()
+            ).execute()
+        }.use {
+            it.body!!.string()
+        }
+    SeikiMain.logger.info { rel2 }
+    val gson = Gson()
+    val json1 = gson.fromJson(rel1, BiliVideoApi::class.java)
+    val json2 = gson.fromJson(rel2, BiliSearchApi::class.java)
+    val data1 = json1.data
+    val data2 = kotlin.runCatching {
+        json2.data.result.last().data.first()
+    }.onFailure {
+        return@runCatching messageChainOf(PlainText(json2.message))
+    }.getOrThrow()
+
+    return@runCatching (if (json1.code == 0) buildMessageChain {
+        +this@biliVideo.uploadAsImage(json1.data.pic)
+        +PlainText(json1.data.title + "\n")
+        +PlainText("https://www.bilibili.com/video/${json1.data.bvid}/\n")
+        +PlainText("${data1.bvid} - av${data1.aid}\n")
+        +PlainText("${data2.typename}-${if (data1.copyright == 1) "自制" else "转载"}(${data2.tag})\n")
+        +PlainText("📅${(data2.pubdate * 1000L).transToTime()} 🕑${data2.duration}\n")
+        +PlainText("▶${data1.stat.view.transToNum(1)} ")
+        +PlainText("🈂${data1.stat.danmaku.transToNum(1)}\n")
+        +PlainText("👍${data1.stat.like.transToNum(1)} ")
+        +PlainText("⭐${data1.stat.favorite.transToNum(1)} ")
+        +PlainText("💰${data1.stat.coin.transToNum(1)} ")
+        +PlainText("↗${data1.stat.share.transToNum(1)}\n")
+        +PlainText("💬${data1.stat.reply.transToNum(1)} ")
+        +PlainText("🆙${data1.owner.name} (${json1.data.owner.mid})\n")
+        +PlainText(json1.data.desc)
+    } else messageChainOf(PlainText(json1.message)))
+}.getOrNull()
 
 suspend fun Contact.biliUser(id: Long): MessageChain? =
     this.runCatching {
@@ -289,7 +308,6 @@ data class News(
     val title: String,
     val uin: Long
 )
-
 data class BiliSearchApi(
     val code: Int,
     val `data`: Data2,
@@ -315,16 +333,17 @@ data class DataX(
     val bvid: String,
     val corner: String,
     val cover: String,
+    val danmaku: Int,
     val desc: String,
     val description: String,
     val duration: String,
     val favorites: Int,
-    val hit_columns: List<Any>,
+    val hit_columns: List<String>,
     val id: Int,
     val is_pay: Int,
     val is_union_video: Int,
     val like: Int,
-    val mid: Long,
+    val mid: Int,
     val new_rec_tags: List<Any>,
     val pic: String,
     val play: Int,

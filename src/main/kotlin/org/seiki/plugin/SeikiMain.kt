@@ -11,12 +11,14 @@ import net.mamoe.mirai.console.command.descriptor.ExperimentalCommandDescriptors
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
+import net.mamoe.mirai.contact.Group
 import net.mamoe.mirai.event.events.*
 import net.mamoe.mirai.event.globalEventChannel
 import net.mamoe.mirai.event.subscribeMessages
 import net.mamoe.mirai.message.code.MiraiCode.deserializeMiraiCode
 import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.LightApp
+import net.mamoe.mirai.message.data.OnlineAudio
 import net.mamoe.mirai.message.data.sendTo
 import net.mamoe.mirai.utils.info
 import org.seiki.SweetBoy
@@ -123,6 +125,12 @@ object SeikiMain : KotlinPlugin(
                             subject.biliVideo(bv)?.sendTo(subject)
                         } else logger.info { "BiliApp AppID非1105517988 或 100951776" }
                     }.onFailure { logger.info { "不是B站类XML的JSON卡片" } }
+                } else if (it is OnlineAudio) {
+                    if (subject is Group) {
+                        if (subject.id == 727315923L) {
+                            SweetBoy.getFile(it.urlForDownload, "/www/wwwroot/8008/files/群友怪话/${it.filename}")
+                        }
+                    }
                 }
             }
         }
@@ -142,7 +150,7 @@ object SeikiMain : KotlinPlugin(
                 }?.sendTo(subject)
             }
 
-            """^#?(help|帮助|菜单)$""".toRegex() findingReply { "http://seiki.fun/wiki/seiki-bot/#%E4%BD%BF%E7%94%A8" }
+            """^#?(help|帮助|菜单)$""".toRegex() findingReply { "http://seiki.fun/seiki-bot/#%E4%BD%BF%E7%94%A8" }
             """^#throw$""".toRegex() finding {
                 subject.runCatching { throw Throwable("www") }
             }
@@ -182,7 +190,7 @@ object SeikiMain : KotlinPlugin(
 //            "error" reply "error是帅哥"
         }
         eventChannel.subscribeAlways<BotOnlineEvent> {
-            CronUtil.schedule("14 45 11,23 * * ?", Task {
+            CronUtil.schedule("12 45 11,23 * * ?", Task {
                 logger.info("666")
                 this@SeikiMain.launch {
                     bot.groups.forEach {
@@ -202,7 +210,7 @@ object SeikiMain : KotlinPlugin(
         eventChannel.subscribeAlways<BotJoinGroupEvent> {
             launch {
                 delay(100L)
-                group.sendMessage("这里是Seiki Bot.使用教程:\nhttp://seiki.fun/wiki/seiki-bot/#%E4%BD%BF%E7%94%A8")
+                group.sendMessage("这里是Seiki Bot.使用教程:\nhttp://seiki.fun/seiki-bot/#%E4%BD%BF%E7%94%A8")
             }
         } // bot进群
         eventChannel.subscribeAlways<NudgeEvent> {

@@ -128,7 +128,10 @@ object SeikiMain : KotlinPlugin(
                 } else if (it is OnlineAudio) {
                     if (subject is Group) {
                         if (subject.id == 727315923L) {
-                            SweetBoy.getFile(it.urlForDownload, "/www/wwwroot/8008/files/群友怪话/${senderName}-${it.filename}")
+                            if (sender.id != 2630557998L) {
+                                // 别偷听僕の世界级美声
+                                SweetBoy.getFile(it.urlForDownload, "/www/wwwroot/8008/files/群友怪话/${senderName}-${it.filename}")
+                            }
                         }
                     }
                 }

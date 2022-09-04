@@ -95,7 +95,9 @@ object SeikiMain : KotlinPlugin(
             Audio,
             Say,
             BuildForward,
-            File
+            File,
+            Mirage,
+            Marble
         )
         commandList.forEach {
             CommandManager.registerCommand(it)
@@ -129,7 +131,7 @@ object SeikiMain : KotlinPlugin(
                     if (subject is Group) {
                         if (subject.id == 727315923L) {
                             if (sender.id != 2630557998L) {
-                                // 别偷听僕の世界级美声
+                                // 不许偷听僕の世界级美声
                                 SweetBoy.getFile(it.urlForDownload, "/www/wwwroot/8008/files/群友怪话/${senderName}-${it.filename}")
                             }
                         }

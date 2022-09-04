@@ -14,6 +14,9 @@ import org.seiki.plugin.getOrWaitImage
 import org.seiki.plugin.runCatching
 import org.jetbrains.skia.Image as SkImage
 
+/**
+ * 好像是llt写的（）
+ */
 object PatPat : SimpleCommand(
     SeikiMain, "pat", "patpat", "摸",
     description = "摸一摸"

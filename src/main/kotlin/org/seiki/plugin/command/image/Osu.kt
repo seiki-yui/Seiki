@@ -9,20 +9,21 @@ import org.laolittle.plugin.toExternalResource
 import org.seiki.plugin.SeikiMain
 import org.seiki.plugin.SkikoUtil.makeFromResource
 
+/**
+ * @author xiao_zheng
+ * 自己写的 哼o(´^｀)o
+ * 由LaoLittle改良SuperPlus版本（
+ */
 object Osu : SimpleCommand(
     SeikiMain, "osu",
     description = "生成OSU风格的图标"
 ) {
-    private val paintText = Paint().apply { color = Color.WHITE }
-    private val osuImage = Image.makeFromResource("/data/Osu/osuLogo.png")
-    private val font = Fonts["Aller-Bold", 112.5F]
-    /**
-     * @author xiao_zheng
-     * 自己写的 哼o(´^｀)o
-     * 由LaoLittle改良Super版本（
-     */
     @Handler
     suspend fun UserCommandSender.handle(text: String = "osu!") {
+        val paintText = Paint().apply { color = Color.WHITE }
+        val osuImage = Image.makeFromResource("/data/Osu/osuLogo.png")
+        val font = Fonts["Aller-Bold", 112.5F]
+
         val yPos: Float
         var osuText = TextLine.make(text, font)
         val textWidth = osuText.width

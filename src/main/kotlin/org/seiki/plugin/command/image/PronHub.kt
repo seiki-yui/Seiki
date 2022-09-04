@@ -1,3 +1,5 @@
+@file:Suppress("KDocUnresolvedReference")
+
 package org.seiki.plugin.command.image
 
 import net.mamoe.mirai.console.command.SimpleCommand
@@ -9,6 +11,10 @@ import org.laolittle.plugin.toExternalResource
 import org.seiki.plugin.SeikiMain
 import org.seiki.plugin.runCatching
 
+/**
+ * @author 滑稽360
+ * @see [Github页面](https://github.com/cssxsh)
+ * */
 object PronHub : SimpleCommand(
     SeikiMain, "ph", "pronhub",
     description = "生成PronHub风格的图标"

@@ -14,7 +14,7 @@ object Gpbt : SimpleCommand(
     @Handler
     suspend fun UserCommandSender.handle(text: PlainText, long: Int = 300) {
         subject.runCatching {
-            sendMessage(SweetBoy.get("http://ovooa.com/API/dog/?type=text&msg=$text&num=$long").body!!.string())
+            sendMessage(SweetBoy.get("http://ovooa.com/API/dog/?type=text&msg=$text&num=$long").body()!!.string())
         }
     }
 }

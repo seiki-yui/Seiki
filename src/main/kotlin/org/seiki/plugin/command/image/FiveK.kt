@@ -24,8 +24,8 @@ object FiveK : SimpleCommand(
     suspend fun UserCommandSender.handle(top: String? = "", bottom: String? = "") {
         subject.runCatching {
             val words = arrayOf(top, bottom)
-            val topText = TextLine.make(words[0], Fonts["Noto-Sans-SC-Bold.ttf"])
-            val bottomText = TextLine.make(words[1], Fonts["Noto-Serif-SC-Bold.otf"])
+            val topText = TextLine.make(words[0], Fonts["SourceHanSans-Bold.otf"])
+            val bottomText = TextLine.make(words[1], Fonts["SourceHanSerif-Bold.otf"])
             val width = maxOf(topText.width + 70, bottomText.width + 250).toInt() + 10
             val height = if (bottom != "") 290 else 140
             val surface = Surface.makeRasterN32Premul(width, height)

@@ -15,7 +15,7 @@ object Bottle : CompositeCommand(
     @Description("捡漂流瓶")
     suspend fun UserCommandSender.get() {
         subject.runCatching {
-            val json = Gson().fromJson(SweetBoy.get("http://ovooa.com/API/Piao/").body!!.string(), Bottle::class.java)
+            val json = Gson().fromJson(SweetBoy.get("http://ovooa.com/API/Piao/").body()!!.string(), Bottle::class.java)
             sendMessage("${json.data[0].title}\n${json.data[0].text}\n${json.data[0].time}")
         }
     }
@@ -24,7 +24,7 @@ object Bottle : CompositeCommand(
     @Description("扔漂流瓶")
     suspend fun UserCommandSender.`throw`(title: String, text: String) {
         val json = Gson().fromJson(
-            SweetBoy.get("http://ovooa.com/API/Piao/?Select=1&title=${title}&msg=${text}&QQ=${subject.id}").body!!.string(),
+            SweetBoy.get("http://ovooa.com/API/Piao/?Select=1&title=${title}&msg=${text}&QQ=${subject.id}").body()!!.string(),
             BottleThrow::class.java
         )
         sendMessage(json.text)

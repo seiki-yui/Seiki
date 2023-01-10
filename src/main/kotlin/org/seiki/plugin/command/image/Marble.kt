@@ -6,24 +6,24 @@ import net.mamoe.mirai.event.events.UserMessageEvent
 import net.mamoe.mirai.message.data.Image.Key.queryUrl
 import net.mamoe.mirai.utils.ExternalResource.Companion.sendAsImageTo
 import org.jetbrains.skia.Bitmap
-import org.seiki.plugin.SeikiMain
 import org.jetbrains.skia.IRect
 import org.laolittle.plugin.toExternalResource
 import org.seiki.SweetBoy
-import org.jetbrains.skia.Image as SkiaImage
 import org.seiki.plugin.MathUtil
 import org.seiki.plugin.MathUtil.bilinearInterpolate
+import org.seiki.plugin.SeikiMain
 import org.seiki.plugin.getOrWaitImage
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.floor
 import kotlin.math.sin
+import org.jetbrains.skia.Image as SkiaImage
 
-object Marble: SimpleCommand(
+object Marble : SimpleCommand(
     SeikiMain, "marble"
 ) {
     @Handler
-    suspend fun CommandSenderOnMessage<UserMessageEvent>.handle(i: Float? = null, x: Float? = null,y: Float? = null) {
+    suspend fun CommandSenderOnMessage<UserMessageEvent>.handle(i: Float? = null, x: Float? = null, y: Float? = null) {
         val image = SkiaImage.makeFromEncoded(SweetBoy.getBytes((this.fromEvent.getOrWaitImage() ?: return).queryUrl()))
         val foo = image.width * .1f
         marble(image, MarbleFilter(x ?: foo, y ?: (foo * .1f), i ?: 1f)).use { bitmap ->

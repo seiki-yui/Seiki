@@ -14,7 +14,7 @@ object Form : SimpleCommand(
     @Handler
     suspend fun UserCommandSender.handle(name: String) {
         subject.runCatching {
-            val rel = SweetBoy.get("http://ovooa.com/API/name/?msg=$name").body!!.string()
+            val rel = SweetBoy.get("http://ovooa.com/API/name/?msg=$name").body()!!.string()
             val json = Gson().fromJson(rel, Form::class.java)
             sendMessage(json.text)
         }

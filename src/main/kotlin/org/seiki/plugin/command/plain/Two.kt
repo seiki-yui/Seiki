@@ -13,7 +13,7 @@ object Two : SimpleCommand(
     @Handler
     suspend fun UserCommandSender.handle(name: String) {
         subject.runCatching {
-            sendMessage(SweetBoy.get("http://ovooa.com/API/Ser/?type=text&name=$name").body!!.string())
+            sendMessage(SweetBoy.get("http://ovooa.com/API/Ser/?type=text&name=$name").body()!!.string())
         }
     }
 }

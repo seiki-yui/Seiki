@@ -3,7 +3,7 @@ plugins {
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.serialization") version kotlinVersion
 
-    id("net.mamoe.mirai-console") version "2.12.2"
+    id("net.mamoe.mirai-console") version "2.13.2"
 }
 
 group = "org.seiki"
@@ -22,8 +22,9 @@ repositories {
 fun skikoAwt(ver: String) = "org.jetbrains.skiko:skiko-awt-runtime-$ver"
 
 dependencies {
-    implementation("com.google.code.gson:gson:2.9.0")
-    implementation("cn.hutool:hutool-cron:5.8.5")
+    implementation("com.google.code.gson:gson:2.10")
+    implementation("cn.hutool:hutool-cron:5.8.11")
+    implementation("com.squareup.okhttp3:okhttp:3.14.2")
     val smVer = "1.0.8"
     compileOnly("com.github.LaoLittle:SkikoMirai:$smVer")
     testImplementation("com.github.LaoLittle:SkikoMirai:$smVer")

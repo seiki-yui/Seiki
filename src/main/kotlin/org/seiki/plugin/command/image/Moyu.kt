@@ -23,7 +23,7 @@ object Moyu : SimpleCommand(
     }
 
     suspend fun Contact.moyu(): Image {
-        val rel = SweetBoy.get("https://api.j4u.ink/v1/store/other/proxy/remote/moyu.json").body!!.string()
+        val rel = SweetBoy.get("https://api.j4u.ink/v1/store/other/proxy/remote/moyu.json").body()!!.string()
         val url = Gson().fromJson(rel, Moyu::class.java).data.moyu_url
         return this.uploadAsImage(url)
     }

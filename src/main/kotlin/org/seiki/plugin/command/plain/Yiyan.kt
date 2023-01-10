@@ -13,7 +13,7 @@ object Yiyan : SimpleCommand(
     @Handler
     suspend fun UserCommandSender.handle() {
         subject.runCatching {
-            sendMessage(SweetBoy.get("http://ovooa.com/API/dmyiyan/").body!!.string())
+            sendMessage(SweetBoy.get("http://ovooa.com/API/dmyiyan/").body()!!.string())
         }
     }
 }

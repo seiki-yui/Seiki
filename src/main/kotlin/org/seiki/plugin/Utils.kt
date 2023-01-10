@@ -18,6 +18,7 @@ import org.laolittle.plugin.getBytes
 import org.laolittle.plugin.gif.GifImage
 import org.laolittle.plugin.gif.GifSetting
 import org.laolittle.plugin.gif.buildGifImage
+import org.laolittle.plugin.toExternalResource
 import org.seiki.SweetBoy
 import org.seiki.plugin.SkikoUtil.bar
 import org.seiki.plugin.SkikoUtil.makeFromResource
@@ -27,17 +28,18 @@ import java.awt.image.BufferedImage
 import java.awt.image.DataBufferInt
 import java.io.*
 import java.text.Normalizer
-import org.jetbrains.skia.Image as SkiaImage
+import javax.imageio.ImageIO
+import javax.security.auth.Subject
+import kotlin.math.*
+import kotlin.random.Random
 import org.jetbrains.skia.Canvas as SkiaCanvas
 import org.jetbrains.skia.Color as SkiaColor
+import org.jetbrains.skia.Image as SkiaImage
 import org.jetbrains.skia.Paint as SkiaPaint
 import org.jetbrains.skia.Point as SkiaPoint
 import java.awt.Color as AwtColor
 import java.awt.Font as AwtFont
 import java.awt.Image as AwtImage
-import javax.imageio.ImageIO
-import kotlin.math.*
-import kotlin.random.Random
 
 val ownerList = arrayListOf(2630557998L, 1812691029L)
 
@@ -86,16 +88,17 @@ fun String.convert(max: Int = 200): ArrayList<String> {
     return list
 }
 
-fun Throwable.buildMessage() = buildMessageChain {
+suspend fun Throwable.buildMessage(subject: Contact) = buildMessageChain {
     +PlainText("Warning! ${this@buildMessage}\n")
     if (this@buildMessage.cause != null) +PlainText("Caused by: ${this@buildMessage.cause}")
-    +Image("{D3A4F304-847D-BB7B-1534-8ABFDC7575B4}.png")
+    +org.jetbrains.skia.Image.makeFromResource("/data/Error.jpg").toExternalResource().use { it.uploadAsImage(subject) }
 }
+
 suspend fun <T : Contact, R> T.runCatching(block: suspend T.() -> R): Result<R> {
     return try {
         Result.success(block())
     } catch (e: Throwable) {
-        e.buildMessage().sendTo(this)
+        e.buildMessage(this).sendTo(this)
         Result.failure<R>(e).also { throw e }
     }
 }
@@ -347,7 +350,7 @@ object UnvcodeUtil {
         fun List<Double>.minIndex(): Int {
             var minIndex = 0
             for (i in 1..this.lastIndex) {
-                if (this[i] < this[minIndex])minIndex=i
+                if (this[i] < this[minIndex]) minIndex = i
             }
             return minIndex
         }
@@ -433,7 +436,7 @@ object MirageUtils {
     private var mDarkColorTable: IntArray? = null
 
     // 生成幻影坦克
-    fun buildMirageTank(pathOut:String,pathIn:String,savePath:String){
+    fun buildMirageTank(pathOut: String, pathIn: String, savePath: String) {
         var picA = setImageOne(pathOut)!!
         var picB = setImageTwo(pathIn)!!
         val targetList: List<BufferedImage?> = picResize(picA, picB)
@@ -496,22 +499,22 @@ object MirageUtils {
     }
 
     // 重设图片大小
-    private fun picResize(targetTop: BufferedImage, targetBottom: BufferedImage): List<BufferedImage?>{
+    private fun picResize(targetTop: BufferedImage, targetBottom: BufferedImage): List<BufferedImage?> {
         val topWidth = targetTop.width
         val topHeight = targetTop.height
         val bottomWidth = targetBottom.width
         val bottomHeight = targetBottom.height
         val targetList: MutableList<BufferedImage?> = ArrayList()
 
-        if((topWidth == bottomWidth) && (topHeight == bottomHeight)){
+        if ((topWidth == bottomWidth) && (topHeight == bottomHeight)) {
             targetList.add(targetTop)
             targetList.add(targetBottom)
-        }else{
+        } else {
             val scaleRatio = min(
-                ((topWidth * 1f)/(bottomWidth * 1f)),
-                ((topHeight * 1f)/(bottomHeight * 1f))
+                ((topWidth * 1f) / (bottomWidth * 1f)),
+                ((topHeight * 1f) / (bottomHeight * 1f))
             )
-            if(topWidth * topHeight > bottomWidth * bottomHeight){
+            if (topWidth * topHeight > bottomWidth * bottomHeight) {
                 val scaledWidth = (targetBottom.width * scaleRatio).toInt()
                 val scaledHeight = (targetBottom.height * scaleRatio).toInt()
                 val scaleBottom = targetBottom.getScaledInstance(
@@ -523,41 +526,42 @@ object MirageUtils {
                 val graphics = resultBottom.createGraphics()
                 graphics.drawImage(
                     scaleBottom,
-                    (topWidth-scaledWidth) / 2,
-                    (topHeight-scaledHeight) / 2,
+                    (topWidth - scaledWidth) / 2,
+                    (topHeight - scaledHeight) / 2,
                     null
                 )
                 graphics.dispose()
 
                 targetList.add(targetTop)
                 targetList.add(resultBottom)
-            }else{
+            } else {
                 val scaledWidth = (targetTop.width / scaleRatio).toInt()
                 val scaledHeight = (targetTop.height / scaleRatio).toInt()
-                val scaleTop = targetTop.getScaledInstance(scaledWidth,scaledHeight,AwtImage.SCALE_DEFAULT)
+                val scaleTop = targetTop.getScaledInstance(scaledWidth, scaledHeight, AwtImage.SCALE_DEFAULT)
                 val resultBottom = BufferedImage(scaledWidth, scaledHeight, BufferedImage.TYPE_INT_ARGB)
                 val graphics = resultBottom.createGraphics()
                 graphics.drawImage(
                     targetBottom,
-                    (scaledWidth-bottomWidth) / 2,
-                    (scaledHeight-bottomHeight) / 2,
+                    (scaledWidth - bottomWidth) / 2,
+                    (scaledHeight - bottomHeight) / 2,
                     null
                 )
                 graphics.dispose()
-                targetList.add(image2BufferedImage(scaleTop,scaledWidth,scaledHeight))
+                targetList.add(image2BufferedImage(scaleTop, scaledWidth, scaledHeight))
                 targetList.add(resultBottom)
             }
         }
         return targetList
     }
 
-    private fun image2BufferedImage(image:AwtImage,width:Int,height:Int):BufferedImage{
-        val resultBuffered = BufferedImage(width,height,BufferedImage.TYPE_INT_ARGB)
+    private fun image2BufferedImage(image: AwtImage, width: Int, height: Int): BufferedImage {
+        val resultBuffered = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
         val graphics = resultBuffered.createGraphics()
-        graphics.drawImage(image,0,0,null)
+        graphics.drawImage(image, 0, 0, null)
         graphics.dispose()
         return resultBuffered
     }
+
     //去色
     private fun setGray(target: BufferedImage) {
         val width = target.width
@@ -577,9 +581,11 @@ object MirageUtils {
         val width = target.width
         val height = target.height
         val targetPixels = IntArray(width * height)
-        val result = BufferedImage(target.width, target.height,
-            BufferedImage.TYPE_INT_ARGB)
-        getBitmapPixelColor(target, object : PixelColorHandler{
+        val result = BufferedImage(
+            target.width, target.height,
+            BufferedImage.TYPE_INT_ARGB
+        )
+        getBitmapPixelColor(target, object : PixelColorHandler {
             override fun onHandle(x: Int, y: Int, a: Int, r: Int, g: Int, b: Int) {
                 targetPixels[x + y * width] = getIntFromColor(r, r, g, b)
             }
@@ -739,7 +745,8 @@ object MirageUtils {
     private fun initLightColorTable() {
         // 输出色阶 120 ～ 255 的映射表
         // 由 getColorLevelTable(120, 255); 得来
-        mLightColorTable = intArrayOf(120, 120, 121, 121, 122, 122, 123, 123, 124, 124, 125, 125, 126, 126, 127, 127,
+        mLightColorTable = intArrayOf(
+            120, 120, 121, 121, 122, 122, 123, 123, 124, 124, 125, 125, 126, 126, 127, 127,
             128, 128, 129, 129, 130, 130, 131, 132, 132, 133, 133, 134, 134, 135, 135, 136, 136, 137, 137, 138, 138,
             139, 139, 140, 140, 141, 142, 142, 143, 143, 144, 144, 145, 145, 146, 146, 147, 147, 148, 148, 149, 149,
             150, 150, 151, 152, 152, 153, 153, 154, 154, 155, 155, 156, 156, 157, 157, 158, 158, 159, 159, 160, 161,
@@ -751,13 +758,15 @@ object MirageUtils {
             217, 217, 218, 218, 219, 219, 220, 220, 221, 222, 222, 223, 223, 224, 224, 225, 225, 226, 226, 227, 227,
             228, 228, 229, 229, 230, 231, 231, 232, 232, 233, 233, 234, 234, 235, 235, 236, 236, 237, 237, 238, 239,
             239, 240, 240, 241, 241, 242, 242, 243, 243, 244, 244, 245, 245, 246, 247, 247, 248, 248, 249, 249, 250,
-            250, 251, 251, 252, 252, 253, 253, 254, 255)
+            250, 251, 251, 252, 252, 253, 253, 254, 255
+        )
     }
 
     private fun initDarkColorTable() {
         // 输出色阶 0 ～ 135 的映射表
         // 由 getColorLevelTable(0, 135); 得来
-        mDarkColorTable = intArrayOf(0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 12, 12,
+        mDarkColorTable = intArrayOf(
+            0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 12, 12,
             13, 13, 14, 14, 15, 15, 16, 16, 17, 17, 18, 18, 19, 19, 20, 20, 21, 22, 22, 23, 23, 24, 24, 25, 25, 26,
             26, 27, 27, 28, 28, 29, 29, 30, 30, 31, 32, 32, 33, 33, 34, 34, 35, 35, 36, 36, 37, 37, 38, 38, 39, 39,
             40, 41, 41, 42, 42, 43, 43, 44, 44, 45, 45, 46, 46, 47, 47, 48, 48, 49, 50, 50, 51, 51, 52, 52, 53, 53,
@@ -767,7 +776,8 @@ object MirageUtils {
             95, 96, 96, 97, 97, 98, 98, 99, 99, 100, 100, 101, 102, 102, 103, 103, 104, 104, 105, 105, 106, 106,
             107, 107, 108, 108, 109, 109, 110, 111, 111, 112, 112, 113, 113, 114, 114, 115, 115, 116, 116, 117, 117,
             118, 119, 119, 120, 120, 121, 121, 122, 122, 123, 123, 124, 124, 125, 125, 126, 127, 127, 128, 128, 129,
-            129, 130, 130, 131, 131, 132, 132, 133, 133, 134, 135)
+            129, 130, 130, 131, 131, 132, 132, 133, 133, 134, 135
+        )
     }
 
     private fun getColorLevelTable(outputMin: Int, outputMax: Int): IntArray {
@@ -833,15 +843,17 @@ object MirageUtils {
     }
 
 
-    internal fun convertToJPG(imagePath:String){
+    internal fun convertToJPG(imagePath: String) {
         val bufferedImage: BufferedImage
         try {
             //read image file
             bufferedImage = ImageIO.read(File(imagePath))
 
             // create a blank, RGB, same width and height, and a white background
-            val newBufferedImage = BufferedImage(bufferedImage.width,
-                bufferedImage.height, BufferedImage.TYPE_INT_RGB)
+            val newBufferedImage = BufferedImage(
+                bufferedImage.width,
+                bufferedImage.height, BufferedImage.TYPE_INT_RGB
+            )
 
             //TYPE_INT_RGB:创建一个RBG图像，24位深度，成功将32位图转化成24位
             newBufferedImage.createGraphics().drawImage(bufferedImage, 0, 0, AwtColor.WHITE, null)
@@ -890,6 +902,7 @@ object MathUtil {
         val b = (cy * m0 + y * m1).toInt()
         return a shl 24 or (r shl 16) or (g shl 8) or b
     }
+
     /**
      * Perlin Noise functions
      */
@@ -1187,4 +1200,57 @@ object MathUtil {
             }
         }
     }
+}
+
+object EmojiUtil {
+    private const val MiscellaneousSymbolsAndPictographs = "[\\uD83C\\uDF00-\\uD83D\\uDDFF]"
+    private const val SupplementalSymbolsAndPictographs = "[\\uD83E\\uDD00-\\uD83E\\uDEFF]"
+    private const val Emoticons = "[\\uD83D\\uDE00-\\uD83D\\uDE4F]"
+    private const val TransportAndMapSymbols = "[\\uD83D\\uDE80-\\uD83D\\uDEFF]"
+    private const val MiscellaneousSymbols = "[\\u2600-\\u26FF]\\uFE0F?"
+    private const val Dingbats = "[\\u2700-\\u27BF]\\uFE0F?"
+    private const val EnclosedAlphanumerics = "\\u24C2\\uFE0F?"
+    private const val RegionalIndicatorSymbol = "[\\uD83C\\uDDE6-\\uD83C\\uDDFF]{1,2}"
+    private const val EnclosedAlphanumericSupplement =
+        "[\\uD83C\\uDD70\\uD83C\\uDD71\\uD83C\\uDD7E\\uD83C\\uDD7F\\uD83C\\uDD8E\\uD83C\\uDD91-\\uD83C\\uDD9A]\\uFE0F?"
+    private const val BasicLatin = "[\\u0023\\u002A\\u0030-\\u0039]\\uFE0F?\\u20E3"
+    private const val Arrows = "[\\u2194-\\u2199\\u21A9-\\u21AA]\\uFE0F?"
+    private const val MiscellaneousSymbolsAndArrows = "[\\u2B05-\\u2B07\\u2B1B\\u2B1C\\u2B50\\u2B55]\\uFE0F?"
+    private const val SupplementalArrows = "[\\u2934\\u2935]\\uFE0F?"
+    private const val CJKSymbolsAndPunctuation = "[\\u3030\\u303D]\\uFE0F?"
+    private const val EnclosedCJKLettersAndMonths = "[\\u3297\\u3299]\\uFE0F?"
+    private const val EnclosedIdeographicSupplement =
+        "[\\uD83C\\uDE01\\uD83C\\uDE02\\uD83C\\uDE1A\\uD83C\\uDE2F\\uD83C\\uDE32-\\uD83C\\uDE3A\\uD83C\\uDE50\\uD83C\\uDE51]\\uFE0F?"
+    private const val GeneralPunctuation = "[\\u203C\\u2049]\\uFE0F?"
+    private const val GeometricShapes = "[\\u25AA\\u25AB\\u25B6\\u25C0\\u25FB-\\u25FE]\\uFE0F?"
+    private const val LatinSupplement = "[\\u00A9\\u00AE]\\uFE0F?"
+    private const val LetterlikeSymbols = "[\\u2122\\u2139]\\uFE0F?"
+    private const val MahjongTiles = "\\uD83C\\uDC04\\uFE0F?"
+    private const val PlayingCards = "\\uD83C\\uDCCF\\uFE0F?"
+    private const val MiscellaneousTechnical =
+        "[\\u231A\\u231B\\u2328\\u23CF\\u23E9-\\u23F3\\u23F8-\\u23FA]\\uFE0F?"
+    val fullEmojiRegex = (
+            MiscellaneousSymbolsAndPictographs + "|"
+                    + SupplementalSymbolsAndPictographs + "|"
+                    + Emoticons + "|"
+                    + TransportAndMapSymbols + "|"
+                    + MiscellaneousSymbols + "|"
+                    + Dingbats + "|"
+                    + EnclosedAlphanumerics + "|"
+                    + RegionalIndicatorSymbol + "|"
+                    + EnclosedAlphanumericSupplement + "|"
+                    + BasicLatin + "|"
+                    + Arrows + "|"
+                    + MiscellaneousSymbolsAndArrows + "|"
+                    + SupplementalArrows + "|"
+                    + CJKSymbolsAndPunctuation + "|"
+                    + EnclosedCJKLettersAndMonths + "|"
+                    + EnclosedIdeographicSupplement + "|"
+                    + GeneralPunctuation + "|"
+                    + GeometricShapes + "|"
+                    + LatinSupplement + "|"
+                    + LetterlikeSymbols + "|"
+                    + MahjongTiles + "|"
+                    + PlayingCards + "|"
+                    + MiscellaneousTechnical).toRegex()
 }

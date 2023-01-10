@@ -13,7 +13,7 @@ object Diana : SimpleCommand(
     @Handler
     suspend fun UserCommandSender.handle(name: String = "然然") {
         subject.runCatching {
-            sendMessage(SweetBoy.get("http://139.224.249.110:8008/api/diana/?name=$name").body!!.string())
+            sendMessage(SweetBoy.get("http://res.seiki.fun/api/diana/?name=$name").body()!!.string())
         }
     }
 }

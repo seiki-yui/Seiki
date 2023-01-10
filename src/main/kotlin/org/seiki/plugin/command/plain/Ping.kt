@@ -15,10 +15,10 @@ object Ping : SimpleCommand(
     description = "Ping!"
 ) {
     @Handler
-    suspend fun UserCommandSender.handle(url: String = "139.224.249.110", num: Int = 2) {
+    suspend fun UserCommandSender.handle(url: String = "seiki.fun", num: Int = 2) {
         subject.runCatching {
             val str = "http://ovooa.com/API/ping/?url=$url&num=$num"
-            val rel = SweetBoy.get(str).body!!.string()
+            val rel = SweetBoy.get(str).body()!!.string()
             val json = Gson().fromJson(rel, Ping::class.java)
             (if (json.code == 1) {
                 buildMessageChain {

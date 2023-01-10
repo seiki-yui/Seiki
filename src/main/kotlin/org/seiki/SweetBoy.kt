@@ -11,6 +11,7 @@ import okhttp3.Request
 import okhttp3.Response
 import org.seiki.plugin.SeikiMain
 import java.io.File
+import java.io.InputStream
 import java.text.SimpleDateFormat
 import java.util.concurrent.TimeUnit
 
@@ -64,13 +65,13 @@ object SweetBoy {
     suspend fun getFile(url: String, path: String): File =
         File(path).apply {
             this.outputStream().apply {
-                write(get(url).body!!.byteStream().readBytes())
+                write(get(url).body()!!.byteStream().readBytes())
                 flush()
                 close()
             }
         }
 
-    suspend fun getStream(url: String) = get(url).body!!.byteStream()
+    suspend fun getStream(url: String): InputStream = get(url).body()!!.byteStream()
 
     suspend fun getBytes(url: String) = getStream(url).use { it.readBytes() }
 

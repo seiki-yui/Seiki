@@ -17,7 +17,7 @@ object Baike : SimpleCommand(
     @Handler
     suspend fun UserCommandSender.handle(msg: String) {
         subject.runCatching {
-            val rel = SweetBoy.get("http://ovooa.com/API/bdbk/?Msg=$msg").body!!.string()
+            val rel = SweetBoy.get("http://ovooa.com/API/bdbk/?Msg=$msg").body()!!.string()
             val json = Gson().fromJson(rel, Baike::class.java)
             (if (json.code == 1) buildMessageChain {
                 +PlainText(json.data.Msg + "\n")

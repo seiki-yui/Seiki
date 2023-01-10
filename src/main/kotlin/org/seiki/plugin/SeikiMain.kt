@@ -11,14 +11,12 @@ import net.mamoe.mirai.console.command.descriptor.ExperimentalCommandDescriptors
 import net.mamoe.mirai.console.plugin.jvm.JvmPluginDescription
 import net.mamoe.mirai.console.plugin.jvm.KotlinPlugin
 import net.mamoe.mirai.console.util.ConsoleExperimentalApi
-import net.mamoe.mirai.contact.Group
 import net.mamoe.mirai.event.events.*
 import net.mamoe.mirai.event.globalEventChannel
 import net.mamoe.mirai.event.subscribeMessages
 import net.mamoe.mirai.message.code.MiraiCode.deserializeMiraiCode
 import net.mamoe.mirai.message.data.Image
 import net.mamoe.mirai.message.data.LightApp
-import net.mamoe.mirai.message.data.OnlineAudio
 import net.mamoe.mirai.message.data.sendTo
 import net.mamoe.mirai.utils.info
 import org.seiki.SweetBoy
@@ -54,6 +52,14 @@ object SeikiMain : KotlinPlugin(
 
     @OptIn(ExperimentalCommandDescriptors::class, ConsoleExperimentalApi::class)
     override fun onEnable() {
+        logger.info { "  █████████            ███  █████       ███     ███████████            █████   " }
+        logger.info { " ███░░░░░███          ░░░  ░░███       ░░░     ░░███░░░░░███          ░░███    " }
+        logger.info { "░███    ░░░   ██████  ████  ░███ █████ ████     ░███    ░███  ██████  ███████  " }
+        logger.info { "░░█████████  ███░░███░░███  ░███░░███ ░░███     ░██████████  ███░░███░░░███░   " }
+        logger.info { " ░░░░░░░░███░███████  ░███  ░██████░   ░███     ░███░░░░░███░███ ░███  ░███    " }
+        logger.info { " ███    ░███░███░░░   ░███  ░███░░███  ░███     ░███    ░███░███ ░███  ░███ ███" }
+        logger.info { "░░█████████ ░░██████  █████ ████ █████ █████    ███████████ ░░██████   ░░█████ " }
+        logger.info { " ░░░░░░░░░   ░░░░░░  ░░░░░ ░░░░ ░░░░░ ░░░░░    ░░░░░░░░░░░   ░░░░░░     ░░░░░  " }
         logger.info { "Seiki Main Loaded!" }
         if (!System.getProperties().getProperty("os.name").startsWith("Windows")) {
             System.setProperty("java.awt.headless", "true")
@@ -91,7 +97,8 @@ object SeikiMain : KotlinPlugin(
             Zero,
             Setu,
             Aotu,
-            Cosplay,
+            AotuTouhou,
+//            Cosplay,
             Audio,
             Say,
             BuildForward,
@@ -99,8 +106,10 @@ object SeikiMain : KotlinPlugin(
             Mirage,
             Marble
         )
-        commandList.forEach {
-            CommandManager.registerCommand(it)
+        kotlin.runCatching {
+            commandList.forEach {
+                CommandManager.registerCommand(it)
+            }
         }
         val eventChannel = globalEventChannel()
         eventChannel.subscribeAlways<MessageEvent> {
@@ -114,7 +123,7 @@ object SeikiMain : KotlinPlugin(
                     runCatching {
                         val json = gson.fromJson(it.content, BiliLight::class.java)
                         if (json.meta.detail_1.appid == "1109937557") {
-                            val url = SweetBoy.get(json.meta.detail_1.qqdocurl).use { r -> r.request.url.toString() }
+                            val url = SweetBoy.get(json.meta.detail_1.qqdocurl).use { r -> r.request().url().toString() }
                             val bv = url.matchRegexOrFail(biliVideoRegex)[1]
                             subject.biliVideo(bv)?.sendTo(subject)
                         } else logger.info { "BiliLight出了问题" }
@@ -122,24 +131,19 @@ object SeikiMain : KotlinPlugin(
                     runCatching {
                         val json = gson.fromJson(it.content, BiliApp::class.java)
                         if (json.meta.news.appid == 1105517988 || json.meta.news.appid == 100951776) {
-                            val url = SweetBoy.get(json.meta.news.jumpUrl).use { r -> r.request.url.toString() }
+                            val url = SweetBoy.get(json.meta.news.jumpUrl).use { r -> r.request().url().toString() }
                             val bv = url.matchRegexOrFail(biliVideoRegex)[1]
                             subject.biliVideo(bv)?.sendTo(subject)
                         } else logger.info { "BiliApp AppID非1105517988 或 100951776" }
                     }.onFailure { logger.info { "不是B站类XML的JSON卡片" } }
-                } else if (it is OnlineAudio) {
-                    if (subject is Group) {
-                        if (subject.id == 727315923L) {
-                            if (sender.id != 2630557998L) {
-                                // 不许偷听僕の世界级美声
-                                SweetBoy.getFile(it.urlForDownload, "/www/wwwroot/8008/files/群友怪话/${senderName}-${it.filename}")
-                            }
-                        }
-                    }
                 }
             }
         }
         eventChannel.subscribeMessages {
+            Regex("""^(${EmojiUtil.fullEmojiRegex}) *(${EmojiUtil.fullEmojiRegex})$""") findingReply {
+                val url = "http://ovooa.com/API/emojimix/?emoji1=${it.groupValues[1]}&emoji2=${it.groupValues[2]}&type=text"
+                this.subject.uploadAsImage(SweetBoy.get(url).use { r -> r.body()!!.string() })
+            }
             biliVideoRegex findingReply {
                 logger.info { it.groupValues[1] }
                 subject.biliVideo(it.groupValues[1])
@@ -147,7 +151,7 @@ object SeikiMain : KotlinPlugin(
             biliUserRegex findingReply { subject.biliUser(it.groupValues[1].toLong()) }
             biliUserIDRegex findingReply { subject.biliUser(it.groupValues[1].toLong()) }
             bili23tvRegex finding {
-                val url = SweetBoy.get(it.groupValues[1]).use { r -> r.request.url }.toString()
+                val url = SweetBoy.get(it.groupValues[1]).use { r -> r.request().url() }.toString()
                 when {
                     biliVideoRegex.matches(url) -> subject.biliVideo(url.matchRegex(biliVideoRegex)!![1])
                     biliUserRegex.matches(url) -> subject.biliUser(url.matchRegex(biliUserRegex)!![1].toLong())
@@ -176,12 +180,12 @@ object SeikiMain : KotlinPlugin(
             }
             """^#get ([\s\S]+)$""".toRegex() findingReply {
                 subject.runCatching {
-                    SweetBoy.get(it.groupValues[1]).use { r -> r.body!!.string() }
+                    SweetBoy.get(it.groupValues[1]).use { r -> r.body()!!.string() }
                 }.getOrNull()
             }
             """^#post ([\s\S]+)$""".toRegex() findingReply {
                 subject.runCatching {
-                    SweetBoy.post(it.groupValues[1]).use { r -> r.body!!.string() }
+                    SweetBoy.post(it.groupValues[1]).use { r -> r.body()!!.string() }
                 }.getOrNull()
             }
             """^尸骸之舞$""".toRegex() finding {

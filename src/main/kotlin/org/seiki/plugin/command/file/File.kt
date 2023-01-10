@@ -6,8 +6,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.toList
 import net.mamoe.mirai.console.command.CompositeCommand
 import net.mamoe.mirai.console.command.MemberCommandSender
-import net.mamoe.mirai.message.data.PlainText
 import net.mamoe.mirai.console.command.UserCommandSender
+import net.mamoe.mirai.message.data.PlainText
 import net.mamoe.mirai.message.data.buildForwardMessage
 import net.mamoe.mirai.message.data.sendTo
 import org.seiki.SweetBoy
@@ -16,7 +16,7 @@ import org.seiki.plugin.convert
 import org.seiki.plugin.runCatching
 import java.io.File
 
-object File: CompositeCommand(
+object File : CompositeCommand(
     SeikiMain, "file",
     description = "操作Seiki资源站文件."
 ) {
@@ -29,13 +29,14 @@ object File: CompositeCommand(
                 i += 1
                 str += it.name + (if (it.isDirectory) "/" else "") + (if (i == 0) "" else "\n")
             }
-            buildForwardMessage (subject) {
+            buildForwardMessage(subject) {
                 str.convert().forEach {
                     add(bot, PlainText(it))
                 }
             }.sendTo(subject)
         }
     }
+
     @SubCommand
     suspend fun MemberCommandSender.upload(name: String) {
         subject.runCatching {

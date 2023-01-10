@@ -23,21 +23,22 @@ import java.time.format.DateTimeFormatter
  * @see [Github页面](https://github.com/Echoosx/MiraiMirage)
  * */
 object Mirage : SimpleCommand(
-    SeikiMain, "mirage", "tank","幻影坦克",
+    SeikiMain, "mirage", "tank", "幻影坦克",
     description = "生成幻影坦克图"
 ) {
     private val INPUT_PATH = "${SeikiMain.dataFolder.absolutePath}/Mirage/Input"
     private val OUTPUT_PATH = "${SeikiMain.dataFolder.absolutePath}/Mirage/Output"
+
     @Handler
     suspend fun CommandSenderOnMessage<UserMessageEvent>.handle() {
         val timestamp = DateTimeFormatter.ofPattern("YYMMddHHmmss").format(LocalDateTime.now())
         val outsideImage = this.fromEvent.getOrWaitImage("幻影坦克开始制作...请发送表图...") ?: return
         touchDir("${INPUT_PATH}/${user!!.id}")
-        SweetBoy.getFile(outsideImage.queryUrl(),"${INPUT_PATH}/${user!!.id}/${timestamp}_out.jpg")
-        if(outsideImage.imageType.name != "JPG") convertToJPG("${INPUT_PATH}/${user!!.id}/${timestamp}_out.jpg")
+        SweetBoy.getFile(outsideImage.queryUrl(), "${INPUT_PATH}/${user!!.id}/${timestamp}_out.jpg")
+        if (outsideImage.imageType.name != "JPG") convertToJPG("${INPUT_PATH}/${user!!.id}/${timestamp}_out.jpg")
         val insideImage = this.fromEvent.getOrWaitImage("请发送里图...") ?: return
-        SweetBoy.getFile(insideImage.queryUrl(),"${INPUT_PATH}/${user!!.id}/${timestamp}_in.jpg")
-        if(insideImage.imageType.name != "JPG") convertToJPG("${INPUT_PATH}/${user!!.id}/${timestamp}_in.jpg")
+        SweetBoy.getFile(insideImage.queryUrl(), "${INPUT_PATH}/${user!!.id}/${timestamp}_in.jpg")
+        if (insideImage.imageType.name != "JPG") convertToJPG("${INPUT_PATH}/${user!!.id}/${timestamp}_in.jpg")
         touchDir("${OUTPUT_PATH}/${user!!.id}")
         MirageUtils.buildMirageTank(
             "${INPUT_PATH}/${user!!.id}/${timestamp}_out.jpg",

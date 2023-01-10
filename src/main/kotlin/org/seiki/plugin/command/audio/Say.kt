@@ -15,7 +15,7 @@ object Say : SimpleCommand(
     @Handler
     suspend fun UserCommandSender.handle(text: String) {
         subject.runCatching {
-            val str = SweetBoy.get("http://ovooa.com/API/yuyin/api.php?msg=$text&type=text").body!!.string()
+            val str = SweetBoy.get("http://ovooa.com/API/yuyin/api.php?msg=$text&type=text").body()!!.string()
             subject.uploadAsAudio(str).sendTo(subject)
         }
     }

@@ -17,7 +17,7 @@ object Nbnhhsh : SimpleCommand(
         subject.runCatching {
             val hashMap = HashMap<String, String>()
             hashMap["text"] = text
-            val rel = SweetBoy.post("https://lab.magiconch.com/api/nbnhhsh/guess", hashMap).body!!.string()
+            val rel = SweetBoy.post("https://lab.magiconch.com/api/nbnhhsh/guess", hashMap).body()!!.string()
             val json = Gson().fromJson(rel, Nbnhhsh::class.java)
             val list = json[0].trans
             var str = list[1]

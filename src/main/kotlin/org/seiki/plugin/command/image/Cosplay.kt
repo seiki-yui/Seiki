@@ -20,7 +20,7 @@ object Cosplay : SimpleCommand(
     @Handler
     suspend fun UserCommandSender.handle() {
         val json =
-            Gson().fromJson(SweetBoy.get("http://ovooa.com/API/cosplay/").body!!.string(), Cosplay::class.java)
+            Gson().fromJson(SweetBoy.get("http://ovooa.com/API/cosplay/").body()!!.string(), Cosplay::class.java)
         if (json.code == "1") {
             val start = System.currentTimeMillis()
             val data = json.data.data

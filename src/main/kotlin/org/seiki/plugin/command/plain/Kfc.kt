@@ -13,7 +13,7 @@ object Kfc : SimpleCommand(
     @Handler
     suspend fun UserCommandSender.handle() {
         subject.runCatching {
-            sendMessage(SweetBoy.get("http://139.224.249.110:8008/api/kfc/").body!!.string())
+            sendMessage(SweetBoy.get("http://res.seiki.fun/api/kfc/").body()!!.string())
         }
     }
 }

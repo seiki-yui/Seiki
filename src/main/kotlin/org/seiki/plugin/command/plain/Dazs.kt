@@ -18,7 +18,7 @@ object Dazs : SimpleCommand(
         subject.runCatching {
             buildMessageChain {
                 +PlainText("答案之书对于问题\"$name\"的回答是:\n")
-                +PlainText(SweetBoy.get("http://ovooa.com/API/daan/?type=text").body!!.string())
+                +PlainText(SweetBoy.get("http://ovooa.com/API/daan/?type=text").body()!!.string())
             }.sendTo(subject)
         }
     }

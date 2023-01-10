@@ -6,6 +6,7 @@ import kotlinx.coroutines.launch
 import net.mamoe.mirai.console.command.SimpleCommand
 import net.mamoe.mirai.console.command.UserCommandSender
 import net.mamoe.mirai.message.data.sendTo
+import net.mamoe.mirai.utils.debug
 import net.mamoe.mirai.utils.info
 import net.mamoe.mirai.utils.warning
 import org.seiki.SweetBoy
@@ -17,15 +18,18 @@ object Setu : SimpleCommand(
     description = "获取几张涩图~"
 ) {
     @Handler
-    suspend fun UserCommandSender.handle(number: Int = 1, r18: Int = 0) {
+    suspend fun UserCommandSender.handle(number: Int = 1, line: String = "r18=0") {
         if (number in 1..10) {
             SeikiMain.logger.info { "Setu - 开始缓存" }
             repeat(number) { now ->
                 kotlin.runCatching {
-                    val rel = SweetBoy.get("https://api.lolicon.app/setu/v2?size=regular&r18=$r18").use { it.body!!.string() }
+                    val rel =
+                        SweetBoy.get("https://api.lolicon.app/setu/v2?size=regular&$line").use { it.body()!!.string() }
                     SeikiMain.logger.info { rel }
                     val json = Gson().fromJson(rel, LoliconApi::class.java)
-                    val msg = subject.uploadAsImage(json.data.first().urls.regular).sendTo(subject)
+                    val url = json.data.first().urls.regular
+                    SeikiMain.logger.debug { url }
+                    val msg = subject.uploadAsImage(url).sendTo(subject)
                     launch {
                         delay((20..40).random() * 1000L)
                         SeikiMain.logger.info { "Setu - ${now + 1} / $number RECALL" }
@@ -39,6 +43,7 @@ object Setu : SimpleCommand(
             }
         }
     }
+
     data class LoliconApi(
         val `data`: List<Data>,
         val error: String
